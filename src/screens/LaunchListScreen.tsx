@@ -1,8 +1,9 @@
 import React, { useCallback, useEffect } from 'react';
-import { View, Text, Pressable, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, Text, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useLaunchStore } from '../store/launchStore';
+import { ErrorState } from '../components/ErrorState';
 import { LaunchCard } from '../components/LaunchCard';
 import { LoadingState } from '../components/LoadingState';
 import { SearchBar } from '../components/SearchBar';
@@ -60,17 +61,7 @@ export default function LaunchListScreen({ navigation }: Props) {
     }
 
     if (error) {
-      return (
-        <View className="items-center justify-center py-12">
-          <Text className="text-center text-lg text-red-600 mb-4">{error}</Text>
-          <Pressable
-            className="rounded-md bg-blue-600 px-4 py-2"
-            onPress={retryLaunches}
-          >
-            <Text className="text-center text-white font-semibold">Tentar novamente</Text>
-          </Pressable>
-        </View>
-      );
+      return <ErrorState message={error} onRetry={retryLaunches} />;
     }
 
     return (

@@ -1,46 +1,55 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { getLaunchById } from '../services/launchService';
 import { Launch } from '../@types/launch';
+import { ErrorState } from '../components/ErrorState';
 import { LoadingState } from '../components/LoadingState';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LaunchDetails'>;
 
-export default function LaunchDetailsScreen({ route }: Props) {
+export default function LaunchDetailsScreen({ route, navigation }: Props) {
   const { launchId } = route.params;
   const [launch, setLaunch] = useState<Launch | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const isMountedRef = useRef(true);
+  const requestIdRef = useRef(0);
 
-  useEffect(() => {
-    let isActive = true;
+  const fetchLaunch = useCallback(async () => {
+    const requestId = requestIdRef.current + 1;
+    requestIdRef.current = requestId;
 
     setLaunch(null);
     setLoading(true);
     setError(null);
 
-    async function fetchLaunch() {
-      try {
-        const data = await getLaunchById(launchId);
-        if (!isActive) return;
-        setLaunch(data);
-      } catch {
-        if (!isActive) return;
-        setError('Não foi possível carregar os detalhes do lançamento.');
-      } finally {
-        if (!isActive) return;
-        setLoading(false);
-      }
+    const canUpdate = () =>
+      isMountedRef.current && requestId === requestIdRef.current;
+
+    try {
+      const data = await getLaunchById(launchId);
+      if (!canUpdate()) return;
+      setLaunch(data);
+    } catch {
+      if (!canUpdate()) return;
+      setError('Não foi possível carregar os detalhes do lançamento.');
+    } finally {
+      if (!canUpdate()) return;
+      setLoading(false);
     }
-
-    fetchLaunch();
-
-    return () => {
-      isActive = false;
-    };
   }, [launchId]);
+
+  useEffect(() => {
+    fetchLaunch();
+  }, [fetchLaunch]);
+
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -53,7 +62,11 @@ export default function LaunchDetailsScreen({ route }: Props) {
   if (error || !launch) {
     return (
       <View className="flex-1 items-center justify-center bg-white p-4">
-        <Text className="text-center text-lg text-red-600">{error ?? 'Lançamento não encontrado.'}</Text>
+        <ErrorState
+          message={error ?? 'Lançamento não encontrado.'}
+          onRetry={fetchLaunch}
+          onBack={navigation.goBack}
+        />
       </View>
     );
   }
