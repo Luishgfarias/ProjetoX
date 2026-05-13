@@ -1,5 +1,5 @@
-export type LancamentoList = {
-  docs: Lancamento[];
+export type LaunchList = {
+  docs: Launch[];
   totalDocs: number;
   limit: number;
   totalPages: number;
@@ -11,7 +11,7 @@ export type LancamentoList = {
   nextPage: number | null;
 };
 
-export type Lancamento = {
+export type Launch = {
   id: string;
   name: string;
   flight_number: number;
@@ -33,25 +33,25 @@ export type Lancamento = {
   crew: string[];
   ships: string[];
   capsules: string[];
-  fairings: LancamentoFairings;
-  links: LancamentoLinks;
-  failures: LancamentoFailure[];
-  cores: LancamentoCore[];
+  fairings: LaunchFairings;
+  links: LaunchLinks;
+  failures: LaunchFailure[];
+  cores: LaunchCore[];
   auto_update: boolean;
   launch_library_id: string | null;
 };
 
-export type LancamentoFairings = {
+export type LaunchFairings = {
   reused: boolean | null;
   recovery_attempt: boolean | null;
   recovered: boolean | null;
   ships: string[];
 };
 
-export type LancamentoLinks = {
-  patch: LancamentoPatchLinks;
-  reddit: LancamentoRedditLinks;
-  flickr: LancamentoFlickrLinks;
+export type LaunchLinks = {
+  patch: LaunchPatchLinks;
+  reddit: LaunchRedditLinks;
+  flickr: LaunchFlickrLinks;
   presskit: string | null;
   webcast: string | null;
   youtube_id: string | null;
@@ -59,30 +59,30 @@ export type LancamentoLinks = {
   wikipedia: string | null;
 };
 
-export type LancamentoPatchLinks = {
+export type LaunchPatchLinks = {
   small: string | null;
   large: string | null;
 };
 
-export type LancamentoRedditLinks = {
+export type LaunchRedditLinks = {
   campaign: string | null;
   launch: string | null;
   media: string | null;
   recovery: string | null;
 };
 
-export type LancamentoFlickrLinks = {
+export type LaunchFlickrLinks = {
   small: string[];
   original: string[];
 };
 
-export type LancamentoFailure = {
+export type LaunchFailure = {
   time?: number;
   altitude?: number;
   reason?: string;
 };
 
-export type LancamentoCore = {
+export type LaunchCore = {
   core: string | null;
   flight: number | null;
   gridfins: boolean | null;
@@ -97,9 +97,9 @@ export type LancamentoCore = {
 /**
  * Tipo resumido pra usar em cards/listagem UI
  */
-export type LancamentoCard =
+export type LaunchCard =
   Pick<
-    Lancamento,
+    Launch,
     | "id"
     | "name"
     | "flight_number"
