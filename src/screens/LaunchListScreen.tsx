@@ -3,6 +3,7 @@ import { View, Text, FlatList, ActivityIndicator, RefreshControl } from 'react-n
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useLaunchStore } from '../store/launchStore';
+import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { LaunchCard } from '../components/LaunchCard';
 import { LoadingState } from '../components/LoadingState';
@@ -64,11 +65,7 @@ export default function LaunchListScreen({ navigation }: Props) {
       return <ErrorState message={error} onRetry={retryLaunches} />;
     }
 
-    return (
-      <View className="items-center justify-center py-12">
-        <Text className="text-center text-gray-600">Nenhum lançamento encontrado.</Text>
-      </View>
-    );
+    return <EmptyState search={search} />;
   };
 
   return (
