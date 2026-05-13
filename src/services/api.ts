@@ -8,14 +8,6 @@ type RetriableRequestConfig = InternalAxiosRequestConfig & {
   retryAttempt?: number;
 };
 
-function waitForRetry(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
-function getRetryDelay(attempt: number): number {
-  return DEFAULT_RETRY_DELAY_MS * attempt;
-}
-
 const api = axios.create({
   baseURL: API_BASE_URL,
   timeout: TIMEOUT_MS,
@@ -39,7 +31,9 @@ api.interceptors.response.use(
 
     if (config && currentAttempt < DEFAULT_MAX_ATTEMPTS) {
       config.retryAttempt = currentAttempt + 1;
-      await waitForRetry(getRetryDelay(currentAttempt));
+      await new Promise(resolve => {
+        setTimeout(resolve, DEFAULT_RETRY_DELAY_MS * currentAttempt);
+      });
       return api(config);
     }
 

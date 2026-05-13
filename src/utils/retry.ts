@@ -6,7 +6,7 @@ type RetryOptions = {
   delayMs?: number;
 };
 
-function wait(ms: number): Promise<void> {
+function waitForRetry(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -22,7 +22,7 @@ export async function retryAsync<T>(
     try {
       return await operation();
     } catch {
-      await wait(delayMs * attempt);
+      await waitForRetry(delayMs * attempt);
       attempt += 1;
     }
   }
