@@ -14,18 +14,31 @@ export default function LaunchDetailsScreen({ route }: Props) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    let isActive = true;
+
+    setLaunch(null);
+    setLoading(true);
+    setError(null);
+
     async function fetchLaunch() {
       try {
         const data = await getLaunchById(launchId);
+        if (!isActive) return;
         setLaunch(data);
-      } catch (err) {
+      } catch {
+        if (!isActive) return;
         setError('Não foi possível carregar os detalhes do lançamento.');
       } finally {
+        if (!isActive) return;
         setLoading(false);
       }
     }
 
     fetchLaunch();
+
+    return () => {
+      isActive = false;
+    };
   }, [launchId]);
 
   if (loading) {
@@ -51,7 +64,7 @@ export default function LaunchDetailsScreen({ route }: Props) {
       <Text className="text-sm text-gray-600 mb-4">Data local: {new Date(launch.date_local).toLocaleString()}</Text>
       <Text className="text-base text-gray-800 mb-4">{launch.details ?? 'Sem detalhes disponíveis.'}</Text>
       <Text className="text-sm text-gray-600">Status: {launch.upcoming ? 'Agendado' : launch.success ? 'Sucesso' : 'Falha'}</Text>
-      <Text className="text-sm text-gray-600">Rocket ID: {launch.rocket}</Text>
+      <Text className="text-sm text-gray-600">ID do foguete: {launch.rocket}</Text>
     </ScrollView>
   );
 }

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { LaunchCard } from '../@types/launch';
-import { getLancamentos } from '../services/launchService';
+import { getPaginatedLaunches } from '../services/launchService';
 import { mapLaunchToCard } from '../utils/mapLaunchToCard';
 
 type LaunchState = {
@@ -19,7 +19,7 @@ type LaunchActions = {
   loadMoreLaunches: () => Promise<void>;
   refreshLaunches: () => Promise<void>;
   retryLaunches: () => Promise<void>;
-  setSearch: (value: string) => void;
+  setSearch: (value: string) => Promise<void>;
 };
 
 type LaunchStore = LaunchState & LaunchActions;
@@ -35,90 +35,164 @@ const initialState: LaunchState = {
   search: '',
 };
 
-export const useLaunchStore = create<LaunchStore>((set, get) => ({
-  ...initialState,
+export const useLaunchStore = create<LaunchStore>((set, get) => {
+  let latestListRequestId = 0;
 
-  loadInitialLaunches: async () => {
-    set({ isLoading: true, error: null });
-    try {
-      const response = await getLancamentos(1);
-      const launches = response.docs.map(mapLaunchToCard);
+  const nextListRequestId = () => {
+    latestListRequestId += 1;
+    return latestListRequestId;
+  };
+
+  const isLatestListRequest = (requestId: number) =>
+    requestId === latestListRequestId;
+
+  return {
+    ...initialState,
+
+    loadInitialLaunches: async () => {
+      const requestId = nextListRequestId();
+      const { search } = get();
+
+      set({ isLoading: true, error: null });
+      try {
+        const response = await getPaginatedLaunches(1, search);
+        if (!isLatestListRequest(requestId)) return;
+
+        const launches = response.docs.map(mapLaunchToCard);
+        set({
+          launches,
+          page: 1,
+          hasNextPage: response.hasNextPage,
+          isLoading: false,
+        });
+      } catch {
+        if (!isLatestListRequest(requestId)) return;
+
+        set({
+          error: 'Falha ao carregar lançamentos.',
+          isLoading: false,
+        });
+      }
+    },
+
+    loadMoreLaunches: async () => {
+      const {
+        page,
+        hasNextPage,
+        isLoading,
+        isLoadingMore,
+        isRefreshing,
+        search,
+      } = get();
+      if (!hasNextPage || isLoading || isLoadingMore || isRefreshing) return;
+
+      set({ isLoadingMore: true, error: null });
+      try {
+        const nextPage = page + 1;
+        const response = await getPaginatedLaunches(nextPage, search);
+        if (get().search !== search) return;
+
+        const newLaunches = response.docs.map(mapLaunchToCard);
+        set((state) => ({
+          launches: [...state.launches, ...newLaunches],
+          page: nextPage,
+          hasNextPage: response.hasNextPage,
+          isLoadingMore: false,
+        }));
+      } catch {
+        if (get().search !== search) return;
+
+        set({
+          error: 'Falha ao carregar mais lançamentos.',
+          isLoadingMore: false,
+        });
+      }
+    },
+
+    refreshLaunches: async () => {
+      const requestId = nextListRequestId();
+      const { search } = get();
+
+      set({ isRefreshing: true, error: null });
+      try {
+        const response = await getPaginatedLaunches(1, search);
+        if (!isLatestListRequest(requestId)) return;
+
+        const launches = response.docs.map(mapLaunchToCard);
+        set({
+          launches,
+          page: 1,
+          hasNextPage: response.hasNextPage,
+          isRefreshing: false,
+        });
+      } catch {
+        if (!isLatestListRequest(requestId)) return;
+
+        set({
+          error: 'Falha ao atualizar lançamentos.',
+          isRefreshing: false,
+        });
+      }
+    },
+
+    retryLaunches: async () => {
+      const requestId = nextListRequestId();
+      const { page, search } = get();
+
+      set({ isLoading: true, error: null });
+      try {
+        const response = await getPaginatedLaunches(page, search);
+        if (!isLatestListRequest(requestId)) return;
+
+        const launches = response.docs.map(mapLaunchToCard);
+        set({
+          launches,
+          hasNextPage: response.hasNextPage,
+          isLoading: false,
+        });
+      } catch {
+        if (!isLatestListRequest(requestId)) return;
+
+        set({
+          error: 'Falha ao tentar novamente.',
+          isLoading: false,
+        });
+      }
+    },
+
+    setSearch: async (value: string) => {
+      const requestId = nextListRequestId();
+
       set({
-        launches,
+        search: value,
         page: 1,
-        hasNextPage: response.hasNextPage,
-        isLoading: false,
-      });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Failed to load launches',
-        isLoading: false,
-      });
-    }
-  },
-
-  loadMoreLaunches: async () => {
-    const { page, hasNextPage, isLoadingMore } = get();
-    if (!hasNextPage || isLoadingMore) return;
-
-    set({ isLoadingMore: true, error: null });
-    try {
-      const nextPage = page + 1;
-      const response = await getLancamentos(nextPage);
-      const newLaunches = response.docs.map(mapLaunchToCard);
-      set((state) => ({
-        launches: [...state.launches, ...newLaunches],
-        page: nextPage,
-        hasNextPage: response.hasNextPage,
+        launches: [],
+        hasNextPage: true,
+        isLoading: true,
         isLoadingMore: false,
-      }));
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Failed to load more launches',
-        isLoadingMore: false,
-      });
-    }
-  },
-
-  refreshLaunches: async () => {
-    set({ isRefreshing: true, error: null });
-    try {
-      const response = await getLancamentos(1);
-      const launches = response.docs.map(mapLaunchToCard);
-      set({
-        launches,
-        page: 1,
-        hasNextPage: response.hasNextPage,
         isRefreshing: false,
+        error: null,
       });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Failed to refresh launches',
-        isRefreshing: false,
-      });
-    }
-  },
 
-  retryLaunches: async () => {
-    const { page } = get();
-    set({ isLoading: true, error: null });
-    try {
-      const response = await getLancamentos(page);
-      const launches = response.docs.map(mapLaunchToCard);
-      set({
-        launches,
-        hasNextPage: response.hasNextPage,
-        isLoading: false,
-      });
-    } catch (error) {
-      set({
-        error: error instanceof Error ? error.message : 'Failed to retry launches',
-        isLoading: false,
-      });
-    }
-  },
+      try {
+        const response = await getPaginatedLaunches(1, value);
+        if (!isLatestListRequest(requestId)) return;
 
-  setSearch: (value: string) => {
-    set({ search: value });
-  },
-}));
+        const launches = response.docs.map(mapLaunchToCard);
+        set({
+          launches,
+          page: 1,
+          hasNextPage: response.hasNextPage,
+          isLoading: false,
+        });
+      } catch {
+        if (!isLatestListRequest(requestId)) return;
+
+        set({
+          error: 'Falha ao buscar lançamentos.',
+          isLoading: false,
+        });
+      }
+    },
+  };
+});

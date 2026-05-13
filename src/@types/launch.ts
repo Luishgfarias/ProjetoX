@@ -94,9 +94,6 @@ export type LaunchCore = {
   landpad: string | null;
 };
 
-/**
- * Tipo resumido pra usar em cards/listagem UI
- */
 export type LaunchCard =
   Pick<
     Launch,

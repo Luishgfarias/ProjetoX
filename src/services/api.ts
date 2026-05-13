@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'https://api.spacexdata.com/v5/';
+const API_BASE_URL = 'https://api.spacexdata.com/v4/';
 const TIMEOUT_MS = 10000;
 
 const api = axios.create({
@@ -13,7 +13,6 @@ const api = axios.create({
 
 api.interceptors.request.use(
   config => {
-    // Aqui você pode adicionar cabeçalhos comuns, tokens ou logs.
     return config;
   },
   error => Promise.reject(error)
