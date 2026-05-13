@@ -1,5 +1,12 @@
-import React, { useCallback, useEffect } from 'react';
-import { View, Text, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
+import React, { useCallback, useEffect, useRef } from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  ActivityIndicator,
+  RefreshControl,
+  ViewToken,
+} from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useLaunchStore } from '../store/launchStore';
@@ -11,20 +18,61 @@ import { SearchBar } from '../components/SearchBar';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LaunchList'>;
 
+const PAGE_SIZE = 10;
+const NEXT_PAGE_TRIGGER_OFFSET = 4;
+
 export default function LaunchListScreen({ navigation }: Props) {
   const {
     launches,
+    hasNextPage,
     isLoading,
     isLoadingMore,
     isRefreshing,
     error,
     search,
     loadInitialLaunches,
-    loadMoreLaunches,
     refreshLaunches,
     retryLaunches,
     setSearch,
   } = useLaunchStore();
+
+  const onViewableItemsChanged = useRef(
+    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      const maxVisibleIndex = viewableItems.reduce((maxIndex, item) => {
+        if (typeof item.index !== 'number') return maxIndex;
+        return Math.max(maxIndex, item.index);
+      }, -1);
+      if (maxVisibleIndex < 0) return;
+
+      const {
+        page,
+        hasNextPage,
+        isLoading,
+        isLoadingMore,
+        isRefreshing,
+        error,
+        launches,
+        loadMoreLaunches,
+      } = useLaunchStore.getState();
+      const nextPageTriggerIndex = page * PAGE_SIZE - NEXT_PAGE_TRIGGER_OFFSET;
+
+      if (
+        maxVisibleIndex >= nextPageTriggerIndex &&
+        launches.length > 0 &&
+        hasNextPage &&
+        !isLoading &&
+        !isLoadingMore &&
+        !isRefreshing &&
+        !error
+      ) {
+        loadMoreLaunches();
+      }
+    }
+  ).current;
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 50,
+  }).current;
 
   useEffect(() => {
     loadInitialLaunches();
@@ -53,6 +101,17 @@ export default function LaunchListScreen({ navigation }: Props) {
         </View>
       );
     }
+
+    if (!hasNextPage && launches.length > 0) {
+      return (
+        <View className="items-center px-6 py-6">
+          <Text className="text-center text-sm font-medium text-gray-500">
+            Fim da rota, comandante. Sem mais missões por enquanto.
+          </Text>
+        </View>
+      );
+    }
+
     return null;
   };
 
@@ -82,8 +141,8 @@ export default function LaunchListScreen({ navigation }: Props) {
         renderItem={renderItem}
         ListEmptyComponent={renderEmpty}
         ListFooterComponent={renderFooter}
-        onEndReached={loadMoreLaunches}
-        onEndReachedThreshold={0.5}
+        onViewableItemsChanged={onViewableItemsChanged}
+        viewabilityConfig={viewabilityConfig}
         refreshControl={
           <RefreshControl refreshing={isRefreshing} onRefresh={refreshLaunches} />
         }

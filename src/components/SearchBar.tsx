@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pressable, Text, TextInput, View } from 'react-native';
+import { Pressable, TextInput, View } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export type SearchBarProps = {
   value: string;
@@ -16,6 +17,10 @@ export function SearchBar({
     onChangeText(value.trim());
   };
 
+  const handleClearPress = () => {
+    onChangeText('');
+  };
+
   return (
     <View className="mb-4 flex-row items-center rounded-full border border-gray-300 bg-white px-3 py-2">
       <TextInput
@@ -27,13 +32,23 @@ export function SearchBar({
         returnKeyType="search"
         onSubmitEditing={handleSearchPress}
       />
+      {value.length > 0 ? (
+        <Pressable
+          accessibilityLabel="Limpar busca"
+          accessibilityRole="button"
+          className="ml-2 h-8 w-8 items-center justify-center rounded-full bg-gray-100 active:bg-gray-200"
+          onPress={handleClearPress}
+        >
+          <MaterialIcons name="close" size={18} color="#4b5563" />
+        </Pressable>
+      ) : null}
       <Pressable
         accessibilityLabel="Buscar lançamentos"
         accessibilityRole="button"
         className="ml-3 h-10 w-10 items-center justify-center rounded-full bg-gray-900 active:bg-gray-700"
         onPress={handleSearchPress}
       >
-        <Text className="text-xl font-bold leading-6 text-white">⌕</Text>
+        <MaterialIcons name="search" size={22} color="#ffffff" />
       </Pressable>
     </View>
   );
