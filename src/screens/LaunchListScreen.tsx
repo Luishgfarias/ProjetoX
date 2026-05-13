@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useLaunchStore } from '../store/launchStore';
 import { LaunchCard } from '../components/LaunchCard';
+import { LoadingState } from '../components/LoadingState';
 import { SearchBar } from '../components/SearchBar';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LaunchList'>;
@@ -55,11 +56,7 @@ export default function LaunchListScreen({ navigation }: Props) {
 
   const renderEmpty = () => {
     if (isLoading) {
-      return (
-        <View className="flex-1 items-center justify-center py-12">
-          <ActivityIndicator size="large" color="#2563eb" />
-        </View>
-      );
+      return <LoadingState text="Carregando lançamentos..." />;
     }
 
     if (error) {

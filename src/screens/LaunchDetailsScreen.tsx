@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { getLaunchById } from '../services/launchService';
 import { Launch } from '../@types/launch';
+import { LoadingState } from '../components/LoadingState';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LaunchDetails'>;
 
@@ -44,7 +45,7 @@ export default function LaunchDetailsScreen({ route }: Props) {
   if (loading) {
     return (
       <View className="flex-1 items-center justify-center bg-white">
-        <ActivityIndicator size="large" color="#2563eb" />
+        <LoadingState text="Carregando detalhes..." />
       </View>
     );
   }
