@@ -1,6 +1,6 @@
-import React, { memo } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
-import { LaunchCard as LancamentoCard } from '../@types/launch';
+import React, { memo } from "react";
+import { Image, Pressable, Text, View } from "react-native";
+import { LaunchCard as LancamentoCard } from "../@types/launch";
 
 type LaunchStatus = {
   label: string;
@@ -15,28 +15,28 @@ export type LaunchCardProps = {
 function getLaunchStatus(lancamento: LancamentoCard): LaunchStatus {
   if (lancamento.upcoming) {
     return {
-      label: 'Futuro',
-      className: 'bg-sky-100 text-slate-700',
+      label: "Agendado",
+      className: "bg-sky-100 text-slate-700",
     };
   }
 
   if (lancamento.success === true) {
     return {
-      label: 'Sucesso',
-      className: 'bg-emerald-50 text-stone-600',
+      label: "Sucesso",
+      className: "bg-emerald-50 text-stone-600",
     };
   }
 
   if (lancamento.success === false) {
     return {
-      label: 'Falha',
-      className: 'bg-rose-50 text-stone-600',
+      label: "Falha",
+      className: "bg-rose-50 text-stone-600",
     };
   }
 
   return {
-    label: 'Indefinido',
-    className: 'bg-gray-100 text-gray-700',
+    label: "Indefinido",
+    className: "bg-gray-100 text-gray-700",
   };
 }
 
@@ -59,7 +59,7 @@ function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
         <Image
           className="mr-4 h-16 w-16 rounded-md"
           resizeMode="contain"
-          source={require('../../public/noMissionImage.png')}
+          source={require("../../public/noMissionImage.png")}
         />
       )}
 

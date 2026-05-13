@@ -1,11 +1,12 @@
-import { create } from 'zustand';
-import { LaunchCard } from '../@types/launch';
-import { getPaginatedLaunches } from '../services/launchService';
-import { clearLaunchCache } from '../storage/launchStorage';
-import { mapLaunchToCard } from '../utils/mapLaunchToCard';
+import { create } from "zustand";
+import { Launch, LaunchCard } from "../@types/launch";
+import { getPaginatedLaunches } from "../services/launchService";
+import { clearLaunchCache } from "../storage/launchStorage";
+import { mapLaunchToCard } from "../utils/mapLaunchToCard";
 
 type LaunchState = {
   launches: LaunchCard[];
+  launchDetailsById: Record<string, Launch>;
   page: number;
   hasNextPage: boolean;
   isLoading: boolean;
@@ -21,20 +22,29 @@ type LaunchActions = {
   refreshLaunches: () => Promise<void>;
   retryLaunches: () => Promise<void>;
   setSearch: (value: string) => Promise<void>;
+  setLaunchDetail: (launch: Launch) => void;
 };
 
 type LaunchStore = LaunchState & LaunchActions;
 
 const initialState: LaunchState = {
   launches: [],
+  launchDetailsById: {},
   page: 1,
   hasNextPage: true,
   isLoading: false,
   isLoadingMore: false,
   isRefreshing: false,
   error: null,
-  search: '',
+  search: "",
 };
+
+function mapLaunchDetailsById(launches: Launch[]): Record<string, Launch> {
+  return launches.reduce<Record<string, Launch>>((acc, launch) => {
+    acc[launch.id] = launch;
+    return acc;
+  }, {});
+}
 
 export const useLaunchStore = create<LaunchStore>((set, get) => {
   let latestListRequestId = 0;
@@ -62,6 +72,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const launches = response.docs.map(mapLaunchToCard);
         set({
           launches,
+          launchDetailsById: mapLaunchDetailsById(response.docs),
           page: 1,
           hasNextPage: response.hasNextPage,
           isLoading: false,
@@ -70,7 +81,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (!isLatestListRequest(requestId)) return;
 
         set({
-          error: 'Falha ao carregar lançamentos.',
+          error: "Falha ao carregar lançamentos.",
           isLoading: false,
         });
       }
@@ -94,7 +105,8 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         isLoading ||
         isLoadingMore ||
         isRefreshing
-      ) return;
+      )
+        return;
 
       set({ isLoadingMore: true, error: null });
       try {
@@ -105,6 +117,10 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const newLaunches = response.docs.map(mapLaunchToCard);
         set((state) => ({
           launches: [...state.launches, ...newLaunches],
+          launchDetailsById: {
+            ...state.launchDetailsById,
+            ...mapLaunchDetailsById(response.docs),
+          },
           page: nextPage,
           hasNextPage: response.hasNextPage,
           isLoadingMore: false,
@@ -113,7 +129,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (get().search !== search) return;
 
         set({
-          error: 'Falha ao carregar mais lançamentos.',
+          error: "Falha ao carregar mais lançamentos.",
           isLoadingMore: false,
         });
       }
@@ -137,6 +153,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const launches = response.docs.map(mapLaunchToCard);
         set({
           launches,
+          launchDetailsById: mapLaunchDetailsById(response.docs),
           page: 1,
           hasNextPage: response.hasNextPage,
           isRefreshing: false,
@@ -145,7 +162,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (!isLatestListRequest(requestId)) return;
 
         set({
-          error: 'Falha ao atualizar lançamentos.',
+          error: "Falha ao atualizar lançamentos.",
           isRefreshing: false,
         });
       }
@@ -163,6 +180,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const launches = response.docs.map(mapLaunchToCard);
         set({
           launches,
+          launchDetailsById: mapLaunchDetailsById(response.docs),
           hasNextPage: response.hasNextPage,
           isLoading: false,
         });
@@ -170,7 +188,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (!isLatestListRequest(requestId)) return;
 
         set({
-          error: 'Falha ao tentar novamente.',
+          error: "Falha ao tentar novamente.",
           isLoading: false,
         });
       }
@@ -183,6 +201,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         search: value,
         page: 1,
         launches: [],
+        launchDetailsById: {},
         hasNextPage: true,
         isLoading: true,
         isLoadingMore: false,
@@ -197,6 +216,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const launches = response.docs.map(mapLaunchToCard);
         set({
           launches,
+          launchDetailsById: mapLaunchDetailsById(response.docs),
           page: 1,
           hasNextPage: response.hasNextPage,
           isLoading: false,
@@ -205,10 +225,19 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (!isLatestListRequest(requestId)) return;
 
         set({
-          error: 'Falha ao buscar lançamentos.',
+          error: "Falha ao buscar lançamentos.",
           isLoading: false,
         });
       }
+    },
+
+    setLaunchDetail: (launch: Launch) => {
+      set((state) => ({
+        launchDetailsById: {
+          ...state.launchDetailsById,
+          [launch.id]: launch,
+        },
+      }));
     },
   };
 });

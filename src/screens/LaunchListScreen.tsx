@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef } from "react";
 import {
   View,
   Text,
@@ -7,18 +7,18 @@ import {
   RefreshControl,
   ViewToken,
   ListRenderItem,
-} from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
-import { useLaunchStore } from '../store/launchStore';
-import { LaunchCard as LaunchCardType } from '../@types/launch';
-import { EmptyState } from '../components/EmptyState';
-import { ErrorState } from '../components/ErrorState';
-import { LaunchCard } from '../components/LaunchCard';
-import { LoadingState } from '../components/LoadingState';
-import { SearchBar } from '../components/SearchBar';
+} from "react-native";
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { RootStackParamList } from "../navigation/types";
+import { useLaunchStore } from "../store/launchStore";
+import { LaunchCard as LaunchCardType } from "../@types/launch";
+import { EmptyState } from "../components/EmptyState";
+import { ErrorState } from "../components/ErrorState";
+import { LaunchCard } from "../components/LaunchCard";
+import { LoadingState } from "../components/LoadingState";
+import { SearchBar } from "../components/SearchBar";
 
-type Props = NativeStackScreenProps<RootStackParamList, 'LaunchList'>;
+type Props = NativeStackScreenProps<RootStackParamList, "LaunchList">;
 
 const PAGE_SIZE = 10;
 const NEXT_PAGE_TRIGGER_OFFSET = 4;
@@ -44,7 +44,7 @@ export default function LaunchListScreen({ navigation }: Props) {
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const maxVisibleIndex = viewableItems.reduce((maxIndex, item) => {
-        if (typeof item.index !== 'number') return maxIndex;
+        if (typeof item.index !== "number") return maxIndex;
         return Math.max(maxIndex, item.index);
       }, -1);
       if (maxVisibleIndex < 0) return;
@@ -72,7 +72,7 @@ export default function LaunchListScreen({ navigation }: Props) {
       ) {
         loadMoreLaunches();
       }
-    }
+    },
   ).current;
 
   const viewabilityConfig = useRef({
@@ -92,7 +92,7 @@ export default function LaunchListScreen({ navigation }: Props) {
 
   const handleLaunchPress = useCallback(
     (id: string) => {
-      navigation.navigate('LaunchDetails', { launchId: id });
+      navigation.navigate("LaunchDetails", { id });
     },
     [navigation],
   );
@@ -146,7 +146,7 @@ export default function LaunchListScreen({ navigation }: Props) {
       />
       <FlatList
         data={launches}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={renderItem}
         initialNumToRender={INITIAL_NUM_TO_RENDER}
         maxToRenderPerBatch={MAX_TO_RENDER_PER_BATCH}
