@@ -13,6 +13,7 @@ import { RootStackParamList } from "../navigation/types";
 import { getLaunchById } from "../services/launchService";
 import { Launch } from "../@types/launch";
 import { ErrorState } from "../components/ErrorState";
+import { LaunchVideoPlayer } from "../components/LaunchVideoPlayer";
 import { LoadingState } from "../components/LoadingState";
 import { useLaunchStore } from "../store/launchStore";
 
@@ -277,6 +278,8 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
           </Text>
         </View>
       </Section>
+
+      <LaunchVideoPlayer videoUrl={launch.links?.webcast ?? null} />
 
       <Section title="Informações principais">
         <DetailRow label="Número do voo" value={`#${launch.flight_number}`} />
