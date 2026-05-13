@@ -6,10 +6,12 @@ import {
   ActivityIndicator,
   RefreshControl,
   ViewToken,
+  ListRenderItem,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useLaunchStore } from '../store/launchStore';
+import { LaunchCard as LaunchCardType } from '../@types/launch';
 import { EmptyState } from '../components/EmptyState';
 import { ErrorState } from '../components/ErrorState';
 import { LaunchCard } from '../components/LaunchCard';
@@ -20,6 +22,9 @@ type Props = NativeStackScreenProps<RootStackParamList, 'LaunchList'>;
 
 const PAGE_SIZE = 10;
 const NEXT_PAGE_TRIGGER_OFFSET = 4;
+const INITIAL_NUM_TO_RENDER = 8;
+const MAX_TO_RENDER_PER_BATCH = 6;
+const WINDOW_SIZE = 7;
 
 export default function LaunchListScreen({ navigation }: Props) {
   const {
@@ -76,21 +81,25 @@ export default function LaunchListScreen({ navigation }: Props) {
 
   useEffect(() => {
     loadInitialLaunches();
-  }, []);
+  }, [loadInitialLaunches]);
 
-  const handleSearch = (text: string) => {
-    setSearch(text);
-  };
+  const handleSearch = useCallback(
+    (text: string) => {
+      setSearch(text);
+    },
+    [setSearch],
+  );
 
   const handleLaunchPress = useCallback(
     (id: string) => {
       navigation.navigate('LaunchDetails', { launchId: id });
     },
-    [navigation]
+    [navigation],
   );
 
-  const renderItem = ({ item }: { item: typeof launches[0] }) => (
-    <LaunchCard lancamento={item} onPress={handleLaunchPress} />
+  const renderItem = useCallback<ListRenderItem<LaunchCardType>>(
+    ({ item }) => <LaunchCard lancamento={item} onPress={handleLaunchPress} />,
+    [handleLaunchPress],
   );
 
   const renderFooter = () => {
@@ -139,12 +148,19 @@ export default function LaunchListScreen({ navigation }: Props) {
         data={launches}
         keyExtractor={item => item.id}
         renderItem={renderItem}
+        initialNumToRender={INITIAL_NUM_TO_RENDER}
+        maxToRenderPerBatch={MAX_TO_RENDER_PER_BATCH}
+        windowSize={WINDOW_SIZE}
+        removeClippedSubviews
         ListEmptyComponent={renderEmpty}
         ListFooterComponent={renderFooter}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         refreshControl={
-          <RefreshControl refreshing={isRefreshing} onRefresh={refreshLaunches} />
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={refreshLaunches}
+          />
         }
       />
     </View>
