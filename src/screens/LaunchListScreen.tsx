@@ -1,9 +1,10 @@
 import React, { useCallback, useEffect } from 'react';
-import { View, Text, Pressable, FlatList, ActivityIndicator, RefreshControl, TextInput } from 'react-native';
+import { View, Text, Pressable, FlatList, ActivityIndicator, RefreshControl } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useLaunchStore } from '../store/launchStore';
 import { LaunchCard } from '../components/LaunchCard';
+import { SearchBar } from '../components/SearchBar';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LaunchList'>;
 
@@ -85,8 +86,7 @@ export default function LaunchListScreen({ navigation }: Props) {
   return (
     <View className="flex-1 bg-white p-4">
       <Text className="text-2xl font-bold mb-4">Listagem de Lançamentos</Text>
-      <TextInput
-        className="mb-4 rounded-md border border-gray-300 px-3 py-2"
+      <SearchBar
         placeholder="Buscar por nome da missão..."
         value={search}
         onChangeText={handleSearch}
