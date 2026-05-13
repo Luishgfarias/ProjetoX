@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { Text, View } from 'react-native';
 
 export type EmptyStateProps = {
@@ -17,7 +17,7 @@ function getRandomEmptyLaunchMessage() {
   return emptyLaunchMessages[randomIndex];
 }
 
-function EmptyStateComponent({ search = '' }: EmptyStateProps) {
+export function EmptyState({ search = '' }: EmptyStateProps) {
   const trimmedSearch = search.trim();
   const hasSearch = trimmedSearch.length > 0;
 
@@ -44,5 +44,3 @@ function EmptyStateComponent({ search = '' }: EmptyStateProps) {
     </View>
   );
 }
-
-export const EmptyState = memo(EmptyStateComponent);

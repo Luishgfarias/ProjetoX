@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { Pressable, Text, View } from 'react-native';
 
 export type ErrorStateProps = {
@@ -7,7 +7,7 @@ export type ErrorStateProps = {
   onBack?: () => void;
 };
 
-function ErrorStateComponent({ message, onRetry, onBack }: ErrorStateProps) {
+export function ErrorState({ message, onRetry, onBack }: ErrorStateProps) {
   return (
     <View className="items-center justify-center py-12">
       <Text className="mb-4 text-center text-lg font-medium text-stone-700">
@@ -40,5 +40,3 @@ function ErrorStateComponent({ message, onRetry, onBack }: ErrorStateProps) {
     </View>
   );
 }
-
-export const ErrorState = memo(ErrorStateComponent);

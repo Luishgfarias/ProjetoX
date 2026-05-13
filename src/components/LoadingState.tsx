@@ -1,11 +1,11 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { ActivityIndicator, Text, View } from 'react-native';
 
 export type LoadingStateProps = {
   text?: string;
 };
 
-function LoadingStateComponent({ text }: LoadingStateProps) {
+export function LoadingState({ text }: LoadingStateProps) {
   return (
     <View className="items-center justify-center py-12">
       <ActivityIndicator size="large" color="#111827" />
@@ -17,5 +17,3 @@ function LoadingStateComponent({ text }: LoadingStateProps) {
     </View>
   );
 }
-
-export const LoadingState = memo(LoadingStateComponent);

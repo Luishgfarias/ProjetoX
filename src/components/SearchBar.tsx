@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React from 'react';
 import { Pressable, Text, TextInput, View } from 'react-native';
 
 export type SearchBarProps = {
@@ -7,7 +7,7 @@ export type SearchBarProps = {
   placeholder?: string;
 };
 
-function SearchBarComponent({
+export function SearchBar({
   value,
   onChangeText,
   placeholder = 'Buscar...',
@@ -38,5 +38,3 @@ function SearchBarComponent({
     </View>
   );
 }
-
-export const SearchBar = memo(SearchBarComponent);
