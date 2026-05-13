@@ -53,7 +53,7 @@ export async function clearLaunchCache(): Promise<void> {
       );
     }
   } catch (error) {
-    console.error('Error clearing launch cache:', error);
-    throw new Error('Failed to clear launch cache');
+    // O cache é opcional. Se o AsyncStorage não estiver disponível, o refresh
+    // ainda deve buscar a página 1 na API e resetar a paginação normalmente.
   }
 }

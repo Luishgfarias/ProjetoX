@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { LaunchCard } from '../@types/launch';
 import { getPaginatedLaunches } from '../services/launchService';
+import { clearLaunchCache } from '../storage/launchStorage';
 import { mapLaunchToCard } from '../utils/mapLaunchToCard';
 
 type LaunchState = {
@@ -122,8 +123,14 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
       const requestId = nextListRequestId();
       const { search } = get();
 
-      set({ isRefreshing: true, error: null });
+      set({
+        isRefreshing: true,
+        isLoadingMore: false,
+        error: null,
+      });
+
       try {
+        await clearLaunchCache();
         const response = await getPaginatedLaunches(1, search);
         if (!isLatestListRequest(requestId)) return;
 
