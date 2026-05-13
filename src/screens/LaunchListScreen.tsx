@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { View, Text, Pressable, FlatList, ActivityIndicator, RefreshControl, TextInput } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { useLaunchStore } from '../store/launchStore';
+import { LaunchCard } from '../components/LaunchCard';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'LaunchList'>;
 
@@ -29,17 +30,15 @@ export default function LaunchListScreen({ navigation }: Props) {
     setSearch(text);
   };
 
+  const handleLaunchPress = useCallback(
+    (id: string) => {
+      navigation.navigate('LaunchDetails', { launchId: id });
+    },
+    [navigation]
+  );
+
   const renderItem = ({ item }: { item: typeof launches[0] }) => (
-    <View className="mb-3 rounded-lg border border-gray-200 bg-slate-50 p-4 shadow-sm">
-      <Text className="text-lg font-semibold mb-1">{item.name}</Text>
-      <Text className="text-sm text-gray-600 mb-3">Data: {new Date(item.date_local).toLocaleDateString()}</Text>
-      <Pressable
-        className="rounded-md bg-blue-600 px-4 py-3"
-        onPress={() => navigation.navigate('LaunchDetails', { launchId: item.id })}
-      >
-        <Text className="text-center text-white font-semibold">Ver detalhes</Text>
-      </Pressable>
-    </View>
+    <LaunchCard lancamento={item} onPress={handleLaunchPress} />
   );
 
   const renderFooter = () => {
