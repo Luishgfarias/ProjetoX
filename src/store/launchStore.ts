@@ -82,9 +82,18 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         isLoading,
         isLoadingMore,
         isRefreshing,
+        error,
+        launches,
         search,
       } = get();
-      if (!hasNextPage || isLoading || isLoadingMore || isRefreshing) return;
+      if (
+        error ||
+        launches.length === 0 ||
+        !hasNextPage ||
+        isLoading ||
+        isLoadingMore ||
+        isRefreshing
+      ) return;
 
       set({ isLoadingMore: true, error: null });
       try {
