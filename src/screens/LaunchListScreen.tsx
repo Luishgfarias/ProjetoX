@@ -8,7 +8,9 @@ import {
   Pressable,
   ViewToken,
   ListRenderItem,
+  BackHandler,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { MaterialIcons } from "@expo/vector-icons";
@@ -32,6 +34,7 @@ import {
 } from "../constants/launchList";
 
 type Props = NativeStackScreenProps<RootStackParamList, "LaunchList">;
+const EXIT_HINT_TIMEOUT_MS = 2500;
 
 export default function LaunchListScreen({ navigation }: Props) {
   const { colors, isDark, toggleThemePreference } = useAppTheme();
@@ -49,6 +52,9 @@ export default function LaunchListScreen({ navigation }: Props) {
     setSearch,
   } = useLaunchStore();
   const [searchInput, setSearchInput] = useState(search);
+  const [isExitHintVisible, setIsExitHintVisible] = useState(false);
+  const shouldExitOnBackPress = useRef(false);
+  const exitHintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -92,6 +98,47 @@ export default function LaunchListScreen({ navigation }: Props) {
   useEffect(() => {
     loadInitialLaunches();
   }, [loadInitialLaunches]);
+
+  useFocusEffect(
+    useCallback(() => {
+      const clearExitHint = () => {
+        shouldExitOnBackPress.current = false;
+        setIsExitHintVisible(false);
+
+        if (exitHintTimeoutRef.current) {
+          clearTimeout(exitHintTimeoutRef.current);
+          exitHintTimeoutRef.current = null;
+        }
+      };
+
+      const backSubscription = BackHandler.addEventListener(
+        "hardwareBackPress",
+        () => {
+          if (shouldExitOnBackPress.current) {
+            clearExitHint();
+            BackHandler.exitApp();
+            return true;
+          }
+
+          shouldExitOnBackPress.current = true;
+          setIsExitHintVisible(true);
+
+          exitHintTimeoutRef.current = setTimeout(() => {
+            shouldExitOnBackPress.current = false;
+            setIsExitHintVisible(false);
+            exitHintTimeoutRef.current = null;
+          }, EXIT_HINT_TIMEOUT_MS);
+
+          return true;
+        },
+      );
+
+      return () => {
+        backSubscription.remove();
+        clearExitHint();
+      };
+    }, []),
+  );
 
   const handleSearch = useCallback(
     (text: string) => {
@@ -237,6 +284,18 @@ export default function LaunchListScreen({ navigation }: Props) {
           />
         }
       />
+      {isExitHintVisible ? (
+        <View
+          pointerEvents="none"
+          className="absolute inset-0 items-center justify-center px-6"
+        >
+          <View className="rounded-2xl bg-slate-900 px-5 py-3 shadow-lg dark:bg-slate-100">
+            <Text className="text-center text-sm font-semibold text-white dark:text-slate-950">
+              Se quiser realmente sair, volte mais uma vez.
+            </Text>
+          </View>
+        </View>
+      ) : null}
     </SafeAreaView>
   );
 }
