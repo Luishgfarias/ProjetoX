@@ -1,12 +1,11 @@
 import React, { memo } from "react";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import {
-  Image,
-  Linking,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+  useVideoPlayer,
+  VideoView,
+  type ContentType,
+  type VideoSource,
+} from "expo-video";
 import { WebView } from "react-native-webview";
 import type { Launch } from "../@types/launch";
 import {
@@ -57,14 +56,6 @@ function getVideoUri(videoUrl: LaunchVideoSource) {
     return videoUrl;
   }
 
-  if (typeof videoUrl === "number") {
-    return Image.resolveAssetSource(videoUrl)?.uri ?? null;
-  }
-
-  if (typeof videoUrl === "object" && videoUrl?.assetId) {
-    return Image.resolveAssetSource(videoUrl.assetId)?.uri ?? null;
-  }
-
   if (typeof videoUrl === "object" && videoUrl?.uri) {
     return videoUrl.uri;
   }
@@ -72,63 +63,62 @@ function getVideoUri(videoUrl: LaunchVideoSource) {
   return null;
 }
 
-function hasLocalVideoAsset(videoUrl: LaunchVideoSource) {
+function getDirectVideoContentType(videoUri: string): ContentType {
+  if (/\.m3u8(\?.*)?$/i.test(videoUri)) {
+    return "hls";
+  }
+
+  if (/\.mpd(\?.*)?$/i.test(videoUri)) {
+    return "dash";
+  }
+
+  return "progressive";
+}
+
+function getNativeVideoSource(
+  videoUrl: LaunchVideoSource,
+  videoUri: string | null,
+): VideoSource {
+  if (typeof videoUrl === "number") {
+    return { assetId: videoUrl, contentType: "progressive" };
+  }
+
+  if (typeof videoUrl === "object" && typeof videoUrl?.assetId === "number") {
+    return { assetId: videoUrl.assetId, contentType: "progressive" };
+  }
+
+  if (videoUri && isDirectVideoUrl(videoUri)) {
+    return {
+      uri: videoUri,
+      contentType: getDirectVideoContentType(videoUri),
+    };
+  }
+
+  return null;
+}
+
+function NativeVideoPlayer({ source }: { source: VideoSource }) {
+  const player = useVideoPlayer(source);
+
   return (
-    typeof videoUrl === "number" ||
-    (typeof videoUrl === "object" && Boolean(videoUrl?.assetId))
+    <VideoView
+      contentFit="contain"
+      fullscreenOptions={{ enable: true }}
+      nativeControls
+      player={player}
+      style={styles.video}
+      surfaceType="textureView"
+    />
   );
-}
-
-function escapeHtmlAttribute(value: string) {
-  return value
-    .replaceAll("&", "&amp;")
-    .replaceAll('"', "&quot;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;");
-}
-
-function getHtmlVideoSource(videoUri: string) {
-  const escapedVideoUri = escapeHtmlAttribute(videoUri);
-
-  return `
-    <!doctype html>
-    <html>
-      <head>
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-          html,
-          body {
-            background: #000;
-            height: 100%;
-            margin: 0;
-            overflow: hidden;
-            width: 100%;
-          }
-
-          video {
-            background: #000;
-            height: 100%;
-            object-fit: contain;
-            width: 100%;
-          }
-        </style>
-      </head>
-      <body>
-        <video controls playsinline preload="metadata" src="${escapedVideoUri}"></video>
-      </body>
-    </html>
-  `;
 }
 
 function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
   const videoUri = getVideoUri(videoUrl ?? null);
   const youtubeEmbedUrl = videoUri ? getYoutubeEmbedUrl(videoUri) : null;
-  const htmlVideoSource =
-    videoUri &&
-    !youtubeEmbedUrl &&
-    (hasLocalVideoAsset(videoUrl ?? null) || isDirectVideoUrl(videoUri))
-      ? getHtmlVideoSource(videoUri)
-      : null;
+  const nativeVideoSource = getNativeVideoSource(
+    videoUrl ?? null,
+    youtubeEmbedUrl ? null : videoUri,
+  );
 
   if (!videoUrl) {
     return null;
@@ -162,7 +152,7 @@ function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
     );
   }
 
-  if (!htmlVideoSource && videoUri) {
+  if (!nativeVideoSource && videoUri) {
     return (
       <View className="mb-6">
         <Text className="mb-3 text-lg font-semibold text-app-text dark:text-app-text-dark">
@@ -186,7 +176,7 @@ function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
     );
   }
 
-  if (!htmlVideoSource) {
+  if (!nativeVideoSource) {
     return null;
   }
 
@@ -196,18 +186,7 @@ function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
         Vídeo do lançamento
       </Text>
       <View className="overflow-hidden rounded-lg border border-app-border bg-black dark:border-app-border-dark">
-        <WebView
-          allowFileAccess
-          allowFileAccessFromFileURLs
-          allowUniversalAccessFromFileURLs
-          allowsFullscreenVideo
-          allowsInlineMediaPlayback
-          javaScriptEnabled
-          mediaPlaybackRequiresUserAction={false}
-          originWhitelist={["*"]}
-          source={{ html: htmlVideoSource }}
-          style={styles.video}
-        />
+        <NativeVideoPlayer source={nativeVideoSource} />
       </View>
     </View>
   );
@@ -216,6 +195,7 @@ function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
 const styles = StyleSheet.create({
   video: {
     aspectRatio: VIDEO_ASPECT_RATIO,
+    backgroundColor: "#000",
     width: "100%",
   },
   youtubeVideo: {

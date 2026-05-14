@@ -6,6 +6,7 @@
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "assetBundlePatterns": ["assets/*"],
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -31,6 +32,7 @@
       "eas": {
         "projectId": "02c94047-7279-4eae-bfd1-2300aa5ddfed"
       }
-    }
+    },
+    "plugins": ["expo-video"]
   }
 }
