@@ -15,7 +15,7 @@ export default function AppNavigator() {
         <Stack.Screen
           name="LaunchList"
           component={LaunchListScreen}
-          options={{ title: 'Lançamentos' }}
+          options={{ headerShown: false }}
         />
         <Stack.Screen
           name="LaunchDetails"

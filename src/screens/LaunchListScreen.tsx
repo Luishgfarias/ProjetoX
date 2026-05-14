@@ -9,6 +9,7 @@ import {
   ListRenderItem,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { RootStackParamList } from "../navigation/types";
 import { useLaunchStore } from "../store/launchStore";
 import { LaunchCard as LaunchCardType } from "../@types/launch";
@@ -141,7 +142,7 @@ export default function LaunchListScreen({ navigation }: Props) {
   };
 
   return (
-    <View className="flex-1 bg-white p-4">
+    <SafeAreaView className="flex-1 bg-white p-4">
       <Text className="text-2xl font-bold mb-4">Listagem de Lançamentos</Text>
       <SearchBar
         placeholder="Buscar por nome da missão..."
@@ -167,6 +168,6 @@ export default function LaunchListScreen({ navigation }: Props) {
           />
         }
       />
-    </View>
+    </SafeAreaView>
   );
 }
