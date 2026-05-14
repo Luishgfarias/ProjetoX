@@ -1,6 +1,11 @@
-import React from 'react';
-import { Pressable, TextInput, View } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import React from "react";
+import { Pressable, TextInput, View } from "react-native";
+import { MaterialIcons } from "@expo/vector-icons";
+import {
+  SEARCH_CLEAR_ICON_COLOR,
+  SEARCH_ICON_COLOR,
+  SEARCH_PLACEHOLDER_COLOR,
+} from "../constants/theme";
 
 export type SearchBarProps = {
   value: string;
@@ -11,14 +16,14 @@ export type SearchBarProps = {
 export function SearchBar({
   value,
   onChangeText,
-  placeholder = 'Buscar...',
+  placeholder = "Buscar...",
 }: SearchBarProps) {
   const handleSearchPress = () => {
     onChangeText(value.trim());
   };
 
   const handleClearPress = () => {
-    onChangeText('');
+    onChangeText("");
   };
 
   return (
@@ -26,7 +31,7 @@ export function SearchBar({
       <TextInput
         className="min-w-0 flex-1 text-base text-gray-900"
         placeholder={placeholder}
-        placeholderTextColor="#6b7280"
+        placeholderTextColor={SEARCH_PLACEHOLDER_COLOR}
         value={value}
         onChangeText={onChangeText}
         returnKeyType="search"
@@ -39,7 +44,11 @@ export function SearchBar({
           className="ml-2 h-8 w-8 items-center justify-center rounded-full bg-gray-100 active:bg-gray-200"
           onPress={handleClearPress}
         >
-          <MaterialIcons name="close" size={18} color="#4b5563" />
+          <MaterialIcons
+            name="close"
+            size={18}
+            color={SEARCH_CLEAR_ICON_COLOR}
+          />
         </Pressable>
       ) : null}
       <Pressable
@@ -48,7 +57,7 @@ export function SearchBar({
         className="ml-3 h-10 w-10 items-center justify-center rounded-full bg-gray-900 active:bg-gray-700"
         onPress={handleSearchPress}
       >
-        <MaterialIcons name="search" size={22} color="#ffffff" />
+        <MaterialIcons name="search" size={22} color={SEARCH_ICON_COLOR} />
       </Pressable>
     </View>
   );

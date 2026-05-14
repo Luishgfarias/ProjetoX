@@ -1,44 +1,12 @@
 import React, { memo } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { LaunchCard as LancamentoCard } from "../@types/launch";
-
-type LaunchStatus = {
-  label: string;
-  className: string;
-};
+import { getLaunchStatus } from "../constants/launchStatus";
 
 export type LaunchCardProps = {
   lancamento: LancamentoCard;
   onPress: (id: string) => void;
 };
-
-function getLaunchStatus(lancamento: LancamentoCard): LaunchStatus {
-  if (lancamento.upcoming) {
-    return {
-      label: "Agendado",
-      className: "bg-sky-100 text-slate-700",
-    };
-  }
-
-  if (lancamento.success === true) {
-    return {
-      label: "Sucesso",
-      className: "bg-emerald-50 text-stone-600",
-    };
-  }
-
-  if (lancamento.success === false) {
-    return {
-      label: "Falha",
-      className: "bg-rose-50 text-stone-600",
-    };
-  }
-
-  return {
-    label: "Indefinido",
-    className: "bg-gray-100 text-gray-700",
-  };
-}
 
 function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
   const status = getLaunchStatus(lancamento);

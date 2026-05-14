@@ -1,0 +1,7 @@
+export const LAUNCH_LIST_PAGE_SIZE = 10;
+export const NEXT_PAGE_TRIGGER_OFFSET = 4;
+export const INITIAL_NUM_TO_RENDER = 8;
+export const MAX_TO_RENDER_PER_BATCH = 6;
+export const WINDOW_SIZE = 7;
+export const VIEWABILITY_ITEM_VISIBLE_PERCENT_THRESHOLD = 50;
+export const LIST_FOOTER_INDICATOR_COLOR = "#2563eb";

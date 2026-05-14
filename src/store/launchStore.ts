@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { Launch, LaunchCard } from "../@types/launch";
+import { LAUNCH_ERROR_MESSAGES } from "../constants/launchMessages";
 import { getPaginatedLaunches } from "../services/launchService";
 import { clearLaunchCache } from "../storage/launchStorage";
 import { mapLaunchToCard } from "../utils/mapLaunchToCard";
@@ -81,7 +82,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (!isLatestListRequest(requestId)) return;
 
         set({
-          error: "Falha ao carregar lançamentos.",
+          error: LAUNCH_ERROR_MESSAGES.loadInitial,
           isLoading: false,
         });
       }
@@ -129,7 +130,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (get().search !== search) return;
 
         set({
-          error: "Falha ao carregar mais lançamentos.",
+          error: LAUNCH_ERROR_MESSAGES.loadMore,
           isLoadingMore: false,
         });
       }
@@ -162,7 +163,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (!isLatestListRequest(requestId)) return;
 
         set({
-          error: "Falha ao atualizar lançamentos.",
+          error: LAUNCH_ERROR_MESSAGES.refresh,
           isRefreshing: false,
         });
       }
@@ -188,7 +189,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (!isLatestListRequest(requestId)) return;
 
         set({
-          error: "Falha ao tentar novamente.",
+          error: LAUNCH_ERROR_MESSAGES.retry,
           isLoading: false,
         });
       }
@@ -225,7 +226,7 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         if (!isLatestListRequest(requestId)) return;
 
         set({
-          error: "Falha ao buscar lançamentos.",
+          error: LAUNCH_ERROR_MESSAGES.search,
           isLoading: false,
         });
       }

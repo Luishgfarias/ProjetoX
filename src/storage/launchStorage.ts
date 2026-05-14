@@ -1,15 +1,14 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LaunchList } from '../@types/launch';
-
-const CACHE_KEY_PREFIX = '@launches_cache_';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LaunchList } from "../@types/launch";
+import { LAUNCH_CACHE_KEY_PREFIX } from "../constants/storage";
 
 function getCacheKey(page: number): string {
-  return `${CACHE_KEY_PREFIX}${page}`;
+  return `${LAUNCH_CACHE_KEY_PREFIX}${page}`;
 }
 
 export async function saveLaunchPage(
   page: number,
-  data: LaunchList
+  data: LaunchList,
 ): Promise<void> {
   try {
     const key = getCacheKey(page);
@@ -21,9 +20,7 @@ export async function saveLaunchPage(
   }
 }
 
-export async function getLaunchPage(
-  page: number
-): Promise<LaunchList | null> {
+export async function getLaunchPage(page: number): Promise<LaunchList | null> {
   try {
     const key = getCacheKey(page);
     const cachedData = await AsyncStorage.getItem(key);
@@ -44,13 +41,11 @@ export async function clearLaunchCache(): Promise<void> {
   try {
     const allKeys = await AsyncStorage.getAllKeys();
     const cacheKeys = allKeys.filter((key) =>
-      key.startsWith(CACHE_KEY_PREFIX)
+      key.startsWith(LAUNCH_CACHE_KEY_PREFIX),
     );
 
     if (cacheKeys.length > 0) {
-      await Promise.all(
-        cacheKeys.map((key) => AsyncStorage.removeItem(key))
-      );
+      await Promise.all(cacheKeys.map((key) => AsyncStorage.removeItem(key)));
     }
   } catch (error) {
     // O cache é opcional. Se o AsyncStorage não estiver disponível, o refresh

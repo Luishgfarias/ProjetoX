@@ -9,27 +9,22 @@ import {
 } from "react-native";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { WebView } from "react-native-webview";
+import {
+  DIRECT_VIDEO_URL_PATTERN,
+  MAX_YOUTUBE_HEIGHT,
+  MIN_YOUTUBE_HEIGHT,
+  SCREEN_HORIZONTAL_PADDING,
+  VIDEO_ASPECT_RATIO,
+  YOUTUBE_MOBILE_ORIGIN,
+  YOUTUBE_URL_PATTERNS,
+} from "../constants/launchVideo";
 
 type LaunchVideoPlayerProps = {
   videoUrl?: string | null;
 };
 
-const DIRECT_VIDEO_URL_PATTERN = /\.(mp4|m4v|mov|webm|m3u8|mpd)(\?.*)?$/i;
-const YOUTUBE_MOBILE_ORIGIN = "https://m.youtube.com";
-const SCREEN_HORIZONTAL_PADDING = 32;
-const MIN_YOUTUBE_HEIGHT = 380;
-const MAX_YOUTUBE_HEIGHT = 560;
-
 function getYoutubeId(url: string) {
-  const patterns = [
-    /youtu\.be\/([^?&/]+)/i,
-    /youtube\.com\/watch\?.*v=([^?&]+)/i,
-    /youtube\.com\/embed\/([^?&/]+)/i,
-    /youtube\.com\/live\/([^?&/]+)/i,
-    /youtube\.com\/shorts\/([^?&/]+)/i,
-  ];
-
-  for (const pattern of patterns) {
+  for (const pattern of YOUTUBE_URL_PATTERNS) {
     const match = url.match(pattern);
     if (match?.[1]) return match[1];
   }
@@ -133,7 +128,7 @@ function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
 
 const styles = StyleSheet.create({
   video: {
-    aspectRatio: 16 / 9,
+    aspectRatio: VIDEO_ASPECT_RATIO,
     width: "100%",
   },
   youtubeVideo: {

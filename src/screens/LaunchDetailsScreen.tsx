@@ -15,52 +15,25 @@ import { Launch } from "../@types/launch";
 import { ErrorState } from "../components/ErrorState";
 import { LaunchVideoPlayer } from "../components/LaunchVideoPlayer";
 import { LoadingState } from "../components/LoadingState";
+import {
+  LAUNCH_EMPTY_MESSAGES,
+  LAUNCH_ERROR_MESSAGES,
+  LAUNCH_FALLBACK_TEXT,
+} from "../constants/launchMessages";
+import { getLaunchStatus } from "../constants/launchStatus";
 import { useLaunchStore } from "../store/launchStore";
 
 type Props = NativeStackScreenProps<RootStackParamList, "LaunchDetails">;
 
-type LaunchStatus = {
-  label: string;
-  className: string;
-};
-
-function getLaunchStatus(launch: Launch): LaunchStatus {
-  if (launch.upcoming) {
-    return {
-      label: "Agendado",
-      className: "bg-sky-100 text-slate-700",
-    };
-  }
-
-  if (launch.success === true) {
-    return {
-      label: "Sucesso",
-      className: "bg-emerald-50 text-stone-600",
-    };
-  }
-
-  if (launch.success === false) {
-    return {
-      label: "Falha",
-      className: "bg-rose-50 text-stone-600",
-    };
-  }
-
-  return {
-    label: "Indefinido",
-    className: "bg-gray-100 text-gray-700",
-  };
-}
-
 function formatDate(value: string | null) {
-  if (!value) return "Não informado";
+  if (!value) return LAUNCH_FALLBACK_TEXT.unknown;
   return new Date(value).toLocaleString();
 }
 
 function formatBoolean(value: boolean | null) {
   if (value === true) return "Sim";
   if (value === false) return "Não";
-  return "Não informado";
+  return LAUNCH_FALLBACK_TEXT.unknown;
 }
 
 function formatList(values: string[] | null | undefined, emptyMessage: string) {
@@ -91,7 +64,7 @@ function InlineDetail({
   label: string;
   value?: React.ReactNode | null;
 }) {
-  const displayValue = value ?? "Não informado";
+  const displayValue = value ?? LAUNCH_FALLBACK_TEXT.unknown;
 
   return (
     <Text className="text-sm text-gray-700">
@@ -177,11 +150,11 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
         axios.isAxiosError(requestError) &&
         requestError.response?.status === 404
       ) {
-        setEmptyMessage("Lançamento não encontrado.");
+        setEmptyMessage(LAUNCH_ERROR_MESSAGES.notFound);
         return;
       }
 
-      setError("Não foi possível carregar os detalhes do lançamento.");
+      setError(LAUNCH_ERROR_MESSAGES.details);
     } finally {
       if (!canUpdate()) return;
       setLoading(false);
@@ -222,7 +195,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
     return (
       <View className="flex-1 items-center justify-center bg-white p-4">
         <Text className="mb-4 text-center text-lg font-medium text-stone-700">
-          {emptyMessage ?? "Nenhum dado encontrado para este lançamento."}
+          {emptyMessage ?? LAUNCH_EMPTY_MESSAGES.details}
         </Text>
         <Pressable
           accessibilityLabel="Voltar"
@@ -238,10 +211,10 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
 
   const patchImage = launch.links?.patch?.large ?? launch.links?.patch?.small;
   const flickrImages = launch.links?.flickr?.original?.length ?? 0;
-  const payloads = formatList(launch.payloads, "Nenhuma carga informada");
-  const ships = formatList(launch.ships, "Nenhum navio informado");
-  const capsules = formatList(launch.capsules, "Nenhuma cápsula informada");
-  const crew = formatList(launch.crew, "Nenhuma tripulação informada");
+  const payloads = formatList(launch.payloads, LAUNCH_EMPTY_MESSAGES.payloads);
+  const ships = formatList(launch.ships, LAUNCH_EMPTY_MESSAGES.ships);
+  const capsules = formatList(launch.capsules, LAUNCH_EMPTY_MESSAGES.capsules);
+  const crew = formatList(launch.crew, LAUNCH_EMPTY_MESSAGES.crew);
   const cores = launch.cores ?? [];
   const failures = launch.failures ?? [];
   const status = getLaunchStatus(launch);
@@ -260,7 +233,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
         />
         <Text className="text-2xl font-bold text-gray-950">{launch.name}</Text>
         <Text className="mt-1 text-base text-gray-600">
-          Voo #{launch.flight_number ?? "Não informado"}
+          Voo #{launch.flight_number ?? LAUNCH_FALLBACK_TEXT.unknown}
         </Text>
         <View className="mt-3 self-start">
           <Text
@@ -274,7 +247,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
       <Section title="Detalhes">
         <View className="py-3">
           <Text className="text-base leading-6 text-gray-800">
-            {launch.details ?? "Sem detalhes disponíveis."}
+            {launch.details ?? LAUNCH_FALLBACK_TEXT.noDetails}
           </Text>
         </View>
       </Section>
@@ -286,21 +259,24 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
         <DetailRow label="Data local" value={formatDate(launch.date_local)} />
         <DetailRow label="Data UTC" value={formatDate(launch.date_utc)} />
         <DetailRow label="Status" value={status.label} />
-        <DetailRow label="Rocket ID" value={launch.rocket ?? "Não informado"} />
+        <DetailRow
+          label="Rocket ID"
+          value={launch.rocket ?? LAUNCH_FALLBACK_TEXT.unknown}
+        />
         <DetailRow
           label="Launchpad ID"
-          value={launch.launchpad ?? "Não informado"}
+          value={launch.launchpad ?? LAUNCH_FALLBACK_TEXT.unknown}
         />
         <DetailRow
           label="Precisão da data"
-          value={launch.date_precision ?? "Não informado"}
+          value={launch.date_precision ?? LAUNCH_FALLBACK_TEXT.unknown}
         />
         <DetailRow
           label="Janela de lançamento"
           value={
             launch.window != null
               ? `${launch.window} segundos`
-              : "Não informado"
+              : LAUNCH_FALLBACK_TEXT.unknown
           }
         />
       </Section>
@@ -338,7 +314,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
             </View>
           ))
         ) : (
-          <DetailRow label="Cores" value="Nenhum core informado" />
+          <DetailRow label="Cores" value={LAUNCH_EMPTY_MESSAGES.cores} />
         )}
       </Section>
 
@@ -355,7 +331,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
             </View>
           ))
         ) : (
-          <DetailRow label="Falhas" value="Nenhuma falha registrada" />
+          <DetailRow label="Falhas" value={LAUNCH_EMPTY_MESSAGES.failures} />
         )}
       </Section>
 
@@ -387,7 +363,10 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
         />
         <DetailRow
           label="Navios da coifa"
-          value={formatList(launch.fairings?.ships, "Nenhum navio informado")}
+          value={formatList(
+            launch.fairings?.ships,
+            LAUNCH_EMPTY_MESSAGES.ships,
+          )}
         />
       </Section>
 
@@ -420,7 +399,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
         !launch.links?.reddit?.launch &&
         !launch.links?.reddit?.media &&
         !launch.links?.reddit?.recovery ? (
-          <DetailRow label="Links" value="Nenhum link disponível" />
+          <DetailRow label="Links" value={LAUNCH_EMPTY_MESSAGES.links} />
         ) : null}
       </Section>
 

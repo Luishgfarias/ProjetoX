@@ -17,14 +17,17 @@ import { ErrorState } from "../components/ErrorState";
 import { LaunchCard } from "../components/LaunchCard";
 import { LoadingState } from "../components/LoadingState";
 import { SearchBar } from "../components/SearchBar";
+import {
+  INITIAL_NUM_TO_RENDER,
+  LAUNCH_LIST_PAGE_SIZE,
+  LIST_FOOTER_INDICATOR_COLOR,
+  MAX_TO_RENDER_PER_BATCH,
+  NEXT_PAGE_TRIGGER_OFFSET,
+  VIEWABILITY_ITEM_VISIBLE_PERCENT_THRESHOLD,
+  WINDOW_SIZE,
+} from "../constants/launchList";
 
 type Props = NativeStackScreenProps<RootStackParamList, "LaunchList">;
-
-const PAGE_SIZE = 10;
-const NEXT_PAGE_TRIGGER_OFFSET = 4;
-const INITIAL_NUM_TO_RENDER = 8;
-const MAX_TO_RENDER_PER_BATCH = 6;
-const WINDOW_SIZE = 7;
 
 export default function LaunchListScreen({ navigation }: Props) {
   const {
@@ -59,7 +62,8 @@ export default function LaunchListScreen({ navigation }: Props) {
         launches,
         loadMoreLaunches,
       } = useLaunchStore.getState();
-      const nextPageTriggerIndex = page * PAGE_SIZE - NEXT_PAGE_TRIGGER_OFFSET;
+      const nextPageTriggerIndex =
+        page * LAUNCH_LIST_PAGE_SIZE - NEXT_PAGE_TRIGGER_OFFSET;
 
       if (
         maxVisibleIndex >= nextPageTriggerIndex &&
@@ -76,7 +80,7 @@ export default function LaunchListScreen({ navigation }: Props) {
   ).current;
 
   const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 50,
+    itemVisiblePercentThreshold: VIEWABILITY_ITEM_VISIBLE_PERCENT_THRESHOLD,
   }).current;
 
   useEffect(() => {
@@ -106,7 +110,7 @@ export default function LaunchListScreen({ navigation }: Props) {
     if (isLoadingMore) {
       return (
         <View className="py-4">
-          <ActivityIndicator size="small" color="#2563eb" />
+          <ActivityIndicator size="small" color={LIST_FOOTER_INDICATOR_COLOR} />
         </View>
       );
     }
