@@ -13,13 +13,15 @@
       "backgroundColor": "#101020"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.projetox.app"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#101020"
-      }
+      },
+      "package": "com.projetox.app"
     },
     "web": {
       "bundler": "metro",
@@ -27,6 +29,11 @@
     },
     "plugins": [
       "expo-video"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "02c94047-7279-4eae-bfd1-2300aa5ddfed"
+      }
+    }
   }
 }
