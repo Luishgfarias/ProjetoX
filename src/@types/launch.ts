@@ -1,5 +1,5 @@
-export type LaunchList = {
-  docs: Launch[];
+export type LaunchList<T = Launch> = {
+  docs: T[];
   totalDocs: number;
   limit: number;
   totalPages: number;

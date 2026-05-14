@@ -1,7 +1,25 @@
 import api from "./api";
-import type { Launch, LaunchList } from "../@types/launch";
+import type { Launch, LaunchCard, LaunchList } from "../@types/launch";
 import { LAUNCH_LIST_PAGE_SIZE } from "../constants/launchList";
 import { missaoEspecial } from "../constants/missaoEspecial";
+import { mapLaunchToCard } from "../utils/mapLaunchToCard";
+
+type LaunchListItemResponse = Pick<
+  Launch,
+  | "id"
+  | "name"
+  | "flight_number"
+  | "date_utc"
+  | "date_local"
+  | "upcoming"
+  | "success"
+> & {
+  links: {
+    patch: {
+      small: string | null;
+    };
+  };
+};
 
 function escapeRegex(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -26,9 +44,9 @@ function missaoEspecialMatchesSearch(search: string): boolean {
 }
 
 function withMissaoEspecial(
-  launchList: LaunchList,
+  launchList: LaunchList<LaunchCard>,
   search: string,
-): LaunchList {
+): LaunchList<LaunchCard> {
   if (
     !search ||
     launchList.hasNextPage ||
@@ -39,7 +57,7 @@ function withMissaoEspecial(
 
   return {
     ...launchList,
-    docs: [...launchList.docs, missaoEspecial],
+    docs: [...launchList.docs, mapLaunchToCard(missaoEspecial)],
     totalDocs: launchList.totalDocs + 1,
   };
 }
@@ -47,7 +65,7 @@ function withMissaoEspecial(
 export async function getPaginatedLaunches(
   page: number,
   search?: string,
-): Promise<LaunchList> {
+): Promise<LaunchList<LaunchCard>> {
   const trimmedSearch = search?.trim() || "";
 
   const query = trimmedSearch
@@ -59,16 +77,34 @@ export async function getPaginatedLaunches(
       }
     : {};
 
-  const response = await api.post<LaunchList>("launches/query", {
-    query,
-    options: {
-      page,
-      limit: LAUNCH_LIST_PAGE_SIZE,
-      sort: {
-        date_utc: "desc",
+  const response = await api.post<LaunchList<LaunchListItemResponse>>(
+    "launches/query",
+    {
+      query,
+      options: {
+        page,
+        limit: LAUNCH_LIST_PAGE_SIZE,
+        select: [
+          "id",
+          "name",
+          "flight_number",
+          "date_utc",
+          "date_local",
+          "upcoming",
+          "success",
+          "links.patch.small",
+        ],
+        sort: {
+          date_utc: "desc",
+        },
       },
     },
-  });
+  );
 
-  return withMissaoEspecial(response.data, trimmedSearch);
+  const launchList = {
+    ...response.data,
+    docs: response.data.docs.map(mapLaunchToCard),
+  };
+
+  return withMissaoEspecial(launchList, trimmedSearch);
 }

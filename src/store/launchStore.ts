@@ -3,7 +3,6 @@ import { Launch, LaunchCard } from "../@types/launch";
 import { LAUNCH_ERROR_MESSAGES } from "../constants/launchMessages";
 import { getPaginatedLaunches } from "../services/launchService";
 import { clearLaunchCache } from "../storage/launchStorage";
-import { mapLaunchToCard } from "../utils/mapLaunchToCard";
 
 type LaunchState = {
   launches: LaunchCard[];
@@ -40,13 +39,6 @@ const initialState: LaunchState = {
   search: "",
 };
 
-function mapLaunchDetailsById(launches: Launch[]): Record<string, Launch> {
-  return launches.reduce<Record<string, Launch>>((acc, launch) => {
-    acc[launch.id] = launch;
-    return acc;
-  }, {});
-}
-
 export const useLaunchStore = create<LaunchStore>((set, get) => {
   let latestListRequestId = 0;
 
@@ -70,10 +62,8 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const response = await getPaginatedLaunches(1, search);
         if (!isLatestListRequest(requestId)) return;
 
-        const launches = response.docs.map(mapLaunchToCard);
         set({
-          launches,
-          launchDetailsById: mapLaunchDetailsById(response.docs),
+          launches: response.docs,
           page: 1,
           hasNextPage: response.hasNextPage,
           isLoading: false,
@@ -115,13 +105,8 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const response = await getPaginatedLaunches(nextPage, search);
         if (get().search !== search) return;
 
-        const newLaunches = response.docs.map(mapLaunchToCard);
         set((state) => ({
-          launches: [...state.launches, ...newLaunches],
-          launchDetailsById: {
-            ...state.launchDetailsById,
-            ...mapLaunchDetailsById(response.docs),
-          },
+          launches: [...state.launches, ...response.docs],
           page: nextPage,
           hasNextPage: response.hasNextPage,
           isLoadingMore: false,
@@ -151,10 +136,9 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const response = await getPaginatedLaunches(1, search);
         if (!isLatestListRequest(requestId)) return;
 
-        const launches = response.docs.map(mapLaunchToCard);
         set({
-          launches,
-          launchDetailsById: mapLaunchDetailsById(response.docs),
+          launches: response.docs,
+          launchDetailsById: {},
           page: 1,
           hasNextPage: response.hasNextPage,
           isRefreshing: false,
@@ -178,10 +162,8 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const response = await getPaginatedLaunches(page, search);
         if (!isLatestListRequest(requestId)) return;
 
-        const launches = response.docs.map(mapLaunchToCard);
         set({
-          launches,
-          launchDetailsById: mapLaunchDetailsById(response.docs),
+          launches: response.docs,
           hasNextPage: response.hasNextPage,
           isLoading: false,
         });
@@ -214,10 +196,8 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         const response = await getPaginatedLaunches(1, value);
         if (!isLatestListRequest(requestId)) return;
 
-        const launches = response.docs.map(mapLaunchToCard);
         set({
-          launches,
-          launchDetailsById: mapLaunchDetailsById(response.docs),
+          launches: response.docs,
           page: 1,
           hasNextPage: response.hasNextPage,
           isLoading: false,

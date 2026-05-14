@@ -27,7 +27,7 @@ function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
         <Image
           className="mr-4 h-16 w-16 rounded-md"
           resizeMode="contain"
-          source={require("../../public/noMissionImage.png")}
+          source={require("../../assets/noMissionImage.png")}
         />
       )}
 

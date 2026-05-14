@@ -13,7 +13,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { MaterialIcons } from "@expo/vector-icons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { RootStackParamList } from "../navigation/types";
 import { useLaunchStore } from "../store/launchStore";
 import { LaunchCard as LaunchCardType } from "../@types/launch";

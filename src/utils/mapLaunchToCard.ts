@@ -1,7 +1,22 @@
-import { Launch, LaunchCard } from '../@types/launch';
+import { Launch, LaunchCard } from "../@types/launch";
 
 export function mapLaunchToCard(
-  launch: Launch
+  launch: Pick<
+    Launch,
+    | "id"
+    | "name"
+    | "flight_number"
+    | "date_utc"
+    | "date_local"
+    | "upcoming"
+    | "success"
+  > & {
+    links: {
+      patch: {
+        small: string | null;
+      };
+    };
+  },
 ): LaunchCard {
   return {
     id: launch.id,

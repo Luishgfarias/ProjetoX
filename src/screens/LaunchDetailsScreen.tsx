@@ -266,7 +266,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
           source={
             patchImage
               ? { uri: patchImage }
-              : require("../../public/noMissionImage.png")
+              : require("../../assets/noMissionImage.png")
           }
         />
         <Text className="text-2xl font-bold text-app-text dark:text-app-text-dark">
