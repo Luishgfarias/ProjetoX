@@ -1,15 +1,7 @@
 import React from "react";
 import { Pressable, TextInput, View } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
-import { useColorScheme } from "nativewind";
-import {
-  DARK_SEARCH_CLEAR_ICON_COLOR,
-  DARK_SEARCH_ICON_COLOR,
-  DARK_SEARCH_PLACEHOLDER_COLOR,
-  SEARCH_CLEAR_ICON_COLOR,
-  SEARCH_ICON_COLOR,
-  SEARCH_PLACEHOLDER_COLOR,
-} from "../constants/theme";
+import { useAppTheme } from "../theme/ThemeProvider";
 
 export type SearchBarProps = {
   value: string;
@@ -22,8 +14,7 @@ export function SearchBar({
   onChangeText,
   placeholder = "Buscar...",
 }: SearchBarProps) {
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === "dark";
+  const { colors } = useAppTheme();
 
   const handleSearchPress = () => {
     onChangeText(value.trim());
@@ -38,9 +29,7 @@ export function SearchBar({
       <TextInput
         className="min-w-0 flex-1 text-base text-app-text dark:text-app-text-dark"
         placeholder={placeholder}
-        placeholderTextColor={
-          isDark ? DARK_SEARCH_PLACEHOLDER_COLOR : SEARCH_PLACEHOLDER_COLOR
-        }
+        placeholderTextColor={colors.searchPlaceholder}
         value={value}
         onChangeText={onChangeText}
         returnKeyType="search"
@@ -56,9 +45,7 @@ export function SearchBar({
           <MaterialIcons
             name="close"
             size={18}
-            color={
-              isDark ? DARK_SEARCH_CLEAR_ICON_COLOR : SEARCH_CLEAR_ICON_COLOR
-            }
+            color={colors.searchClearIcon}
           />
         </Pressable>
       ) : null}
@@ -68,11 +55,7 @@ export function SearchBar({
         className="ml-3 h-10 w-10 items-center justify-center rounded-full bg-app-primary active:bg-app-primary-pressed dark:bg-app-primary-dark dark:active:bg-app-primary-pressed-dark"
         onPress={handleSearchPress}
       >
-        <MaterialIcons
-          name="search"
-          size={22}
-          color={isDark ? DARK_SEARCH_ICON_COLOR : SEARCH_ICON_COLOR}
-        />
+        <MaterialIcons name="search" size={22} color={colors.searchIcon} />
       </Pressable>
     </View>
   );

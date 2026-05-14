@@ -1,42 +1,16 @@
 import "./global.css";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { View } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
-import { StatusBar } from 'expo-status-bar';
-import { useColorScheme } from "nativewind";
-import AppNavigator from './src/navigation/AppNavigator';
+import { StatusBar } from "expo-status-bar";
+import AppNavigator from "./src/navigation/AppNavigator";
 import { SPLASH_SCREEN_EXTRA_DELAY_MS } from "./src/constants/theme";
-import { getThemePreference } from "./src/storage/themeStorage";
+import { AppThemeProvider, useAppTheme } from "./src/theme/ThemeProvider";
 
 void SplashScreen.preventAutoHideAsync();
 
-export default function App() {
-  const { colorScheme, setColorScheme } = useColorScheme();
-  const [isThemePreferenceLoaded, setIsThemePreferenceLoaded] =
-    useState(false);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    async function loadThemePreference() {
-      const preference = await getThemePreference();
-
-      if (!isMounted) return;
-
-      setColorScheme(preference ?? "system");
-      requestAnimationFrame(() => {
-        if (isMounted) {
-          setIsThemePreferenceLoaded(true);
-        }
-      });
-    }
-
-    loadThemePreference();
-
-    return () => {
-      isMounted = false;
-    };
-  }, []);
+function AppContent() {
+  const { isDark, isReady } = useAppTheme();
 
   const handleRootLayout = useCallback(() => {
     setTimeout(() => {
@@ -44,7 +18,7 @@ export default function App() {
     }, SPLASH_SCREEN_EXTRA_DELAY_MS);
   }, []);
 
-  if (!isThemePreferenceLoaded) {
+  if (!isReady) {
     return null;
   }
 
@@ -54,7 +28,15 @@ export default function App() {
       onLayout={handleRootLayout}
     >
       <AppNavigator />
-      <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+      <StatusBar style={isDark ? "light" : "dark"} />
     </View>
+  );
+}
+
+export default function App() {
+  return (
+    <AppThemeProvider>
+      <AppContent />
+    </AppThemeProvider>
   );
 }

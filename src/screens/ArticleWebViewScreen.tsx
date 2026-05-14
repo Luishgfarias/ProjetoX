@@ -2,13 +2,9 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { WebView } from "react-native-webview";
-import { useColorScheme } from "nativewind";
 import { RootStackParamList } from "../navigation/types";
 import { LoadingState } from "../components/LoadingState";
-import {
-  NAVIGATION_DARK_THEME,
-  NAVIGATION_LIGHT_THEME,
-} from "../constants/theme";
+import { useAppTheme } from "../theme/ThemeProvider";
 
 type Props = NativeStackScreenProps<RootStackParamList, "ArticleWebView">;
 
@@ -38,14 +34,11 @@ function getArticleThemeScript({
 
 export default function ArticleWebViewScreen({ route }: Props) {
   const { url } = route.params;
-  const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === "dark";
-  const webViewTheme = isDark ? "dark" : "light";
-  const theme = isDark ? NAVIGATION_DARK_THEME : NAVIGATION_LIGHT_THEME;
+  const { colors, resolvedTheme } = useAppTheme();
   const articleThemeScript = getArticleThemeScript({
-    backgroundColor: theme.background,
-    textColor: theme.text,
-    theme: webViewTheme,
+    backgroundColor: colors.background,
+    textColor: colors.text,
+    theme: resolvedTheme,
   });
 
   return (
@@ -61,7 +54,7 @@ export default function ArticleWebViewScreen({ route }: Props) {
         setSupportMultipleWindows={false}
         source={{ uri: url }}
         startInLoadingState
-        style={[styles.webView, { backgroundColor: theme.background }]}
+        style={[styles.webView, { backgroundColor: colors.background }]}
       />
     </View>
   );
