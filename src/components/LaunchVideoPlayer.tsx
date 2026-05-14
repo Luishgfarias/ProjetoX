@@ -1,21 +1,12 @@
 import React, { memo } from "react";
-import {
-  Linking,
-  Pressable,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from "react-native";
+import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { WebView } from "react-native-webview";
 import {
   DIRECT_VIDEO_URL_PATTERN,
-  MAX_YOUTUBE_HEIGHT,
-  MIN_YOUTUBE_HEIGHT,
-  SCREEN_HORIZONTAL_PADDING,
   VIDEO_ASPECT_RATIO,
-  YOUTUBE_MOBILE_ORIGIN,
+  YOUTUBE_APP_REFERRER,
+  YOUTUBE_EMBED_ORIGIN,
   YOUTUBE_URL_PATTERNS,
 } from "../constants/launchVideo";
 
@@ -36,32 +27,33 @@ function isDirectVideoUrl(url: string) {
   return DIRECT_VIDEO_URL_PATTERN.test(url);
 }
 
-function getYoutubeWatchUrl(url: string) {
+function getYoutubeEmbedUrl(url: string) {
   const youtubeId = getYoutubeId(url);
 
   if (!youtubeId) {
     return null;
   }
 
-  return `${YOUTUBE_MOBILE_ORIGIN}/watch?v=${youtubeId}`;
+  const params = new URLSearchParams({
+    playsinline: "1",
+    rel: "0",
+    origin: YOUTUBE_APP_REFERRER,
+  });
+
+  return `${YOUTUBE_EMBED_ORIGIN}/embed/${youtubeId}?${params.toString()}`;
 }
 
 function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
-  const { width } = useWindowDimensions();
   const source = videoUrl && isDirectVideoUrl(videoUrl) ? videoUrl : null;
   const player = useVideoPlayer(source);
-  const youtubeHeight = Math.min(
-    MAX_YOUTUBE_HEIGHT,
-    Math.max(MIN_YOUTUBE_HEIGHT, width - SCREEN_HORIZONTAL_PADDING),
-  );
 
   if (!videoUrl) {
     return null;
   }
 
-  const youtubeWatchUrl = getYoutubeWatchUrl(videoUrl);
+  const youtubeEmbedUrl = getYoutubeEmbedUrl(videoUrl);
 
-  if (youtubeWatchUrl) {
+  if (youtubeEmbedUrl) {
     return (
       <View className="mb-6">
         <Text className="mb-3 text-lg font-semibold text-app-text dark:text-app-text-dark">
@@ -75,9 +67,14 @@ function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
             javaScriptEnabled
             mediaPlaybackRequiresUserAction={false}
             originWhitelist={["*"]}
-            source={{ uri: youtubeWatchUrl }}
+            source={{
+              uri: youtubeEmbedUrl,
+              headers: {
+                Referer: YOUTUBE_APP_REFERRER,
+              },
+            }}
             startInLoadingState
-            style={[styles.youtubeVideo, { height: youtubeHeight }]}
+            style={styles.youtubeVideo}
           />
         </View>
       </View>
@@ -132,6 +129,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   youtubeVideo: {
+    aspectRatio: VIDEO_ASPECT_RATIO,
     width: "100%",
   },
 });
