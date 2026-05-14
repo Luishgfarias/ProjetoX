@@ -3,4 +3,8 @@ export type RootStackParamList = {
   LaunchDetails: {
     id: string;
   };
+  ArticleWebView: {
+    url: string;
+    title?: string;
+  };
 };

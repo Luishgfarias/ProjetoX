@@ -107,6 +107,27 @@ function LinkRow({ label, url }: { label: string; url: string | null }) {
   );
 }
 
+function ArticleButton({
+  onPress,
+  url,
+}: {
+  onPress: (url: string) => void;
+  url: string | null;
+}) {
+  if (!url) return null;
+
+  return (
+    <Pressable
+      accessibilityLabel="Ler artigo"
+      accessibilityRole="button"
+      className="my-3 rounded-full bg-gray-900 px-4 py-3 active:bg-gray-700"
+      onPress={() => onPress(url)}
+    >
+      <Text className="text-center font-semibold text-white">Ler artigo</Text>
+    </Pressable>
+  );
+}
+
 export default function LaunchDetailsScreen({ route, navigation }: Props) {
   const { id } = route.params;
   const cachedLaunch = useLaunchStore((state) => state.launchDetailsById[id]);
@@ -218,6 +239,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
   const cores = launch.cores ?? [];
   const failures = launch.failures ?? [];
   const status = getLaunchStatus(launch);
+  const articleUrl = launch.links?.article ?? null;
 
   return (
     <ScrollView className="flex-1 bg-white p-4">
@@ -371,8 +393,16 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
       </Section>
 
       <Section title="Links úteis">
+        <ArticleButton
+          url={articleUrl}
+          onPress={(url) =>
+            navigation.navigate("ArticleWebView", {
+              url,
+              title: launch.name,
+            })
+          }
+        />
         <LinkRow label="Transmissão" url={launch.links?.webcast ?? null} />
-        <LinkRow label="Artigo" url={launch.links?.article ?? null} />
         <LinkRow label="Wikipedia" url={launch.links?.wikipedia ?? null} />
         <LinkRow label="Presskit" url={launch.links?.presskit ?? null} />
         <LinkRow
