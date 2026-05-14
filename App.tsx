@@ -49,7 +49,10 @@ export default function App() {
   }
 
   return (
-    <View className="flex-1" onLayout={handleRootLayout}>
+    <View
+      className="flex-1 bg-app-background dark:bg-app-background-dark"
+      onLayout={handleRootLayout}
+    >
       <AppNavigator />
       <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
     </View>

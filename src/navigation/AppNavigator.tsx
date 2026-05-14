@@ -30,7 +30,18 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer theme={navigationTheme}>
-      <Stack.Navigator initialRouteName="LaunchList">
+      <Stack.Navigator
+        initialRouteName="LaunchList"
+        screenOptions={{
+          contentStyle: {
+            backgroundColor: navigationTheme.colors.background,
+          },
+          headerStyle: {
+            backgroundColor: navigationTheme.colors.card,
+          },
+          headerTintColor: navigationTheme.colors.text,
+        }}
+      >
         <Stack.Screen
           name="LaunchList"
           component={LaunchListScreen}
