@@ -61,7 +61,7 @@ export default function LaunchListScreen({ navigation }: Props) {
   }, [toggleThemePreference]);
 
   const renderItem = useCallback<ListRenderItem<LaunchCardType>>(
-    ({ item }) => <LaunchCard lancamento={item} onPress={handleLaunchPress} />,
+    ({ item }) => <LaunchCard launch={item} onPress={handleLaunchPress} />,
     [handleLaunchPress],
   );
 

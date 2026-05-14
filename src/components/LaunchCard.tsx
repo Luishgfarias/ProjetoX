@@ -1,29 +1,29 @@
 import React, { memo, useCallback, useMemo } from "react";
 import { Image, Pressable, Text, View } from "react-native";
-import { LaunchCard as LancamentoCard } from "../@types/launch";
+import type { LaunchCard as LaunchCardData } from "../@types/launch";
 import { getLaunchStatus } from "../constants/launchStatus";
 
 export type LaunchCardProps = {
-  lancamento: LancamentoCard;
+  launch: LaunchCardData;
   onPress: (id: string) => void;
 };
 
-function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
-  const status = useMemo(() => getLaunchStatus(lancamento), [lancamento]);
+function LaunchCardComponent({ launch, onPress }: LaunchCardProps) {
+  const status = useMemo(() => getLaunchStatus(launch), [launch]);
   const formattedDate = useMemo(
-    () => new Date(lancamento.date_local).toLocaleDateString(),
-    [lancamento.date_local],
+    () => new Date(launch.date_local).toLocaleDateString(),
+    [launch.date_local],
   );
   const imageSource = useMemo(
     () =>
-      lancamento.patchImage
-        ? { uri: lancamento.patchImage }
+      launch.patchImage
+        ? { uri: launch.patchImage }
         : require("../../assets/noMissionImage.png"),
-    [lancamento.patchImage],
+    [launch.patchImage],
   );
   const handlePress = useCallback(() => {
-    onPress(lancamento.id);
-  }, [lancamento.id, onPress]);
+    onPress(launch.id);
+  }, [launch.id, onPress]);
 
   return (
     <Pressable
@@ -39,7 +39,7 @@ function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
       <View className="min-w-0 flex-1">
         <View className="mb-2 flex-row items-start justify-between">
           <Text className="mr-3 flex-1 text-lg font-semibold text-app-text dark:text-app-text-dark">
-            {lancamento.name}
+            {launch.name}
           </Text>
           <Text
             className={`rounded-full px-2 py-1 text-xs font-semibold ${status.className}`}
@@ -49,7 +49,7 @@ function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
         </View>
 
         <Text className="text-sm text-app-muted dark:text-app-muted-dark">
-          Voo #{lancamento.flight_number}
+          Voo #{launch.flight_number}
         </Text>
         <Text className="mt-1 text-sm text-app-muted dark:text-app-muted-dark">
           Data: {formattedDate}
@@ -59,16 +59,4 @@ function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
   );
 }
 
-export const LaunchCard = memo(
-  LaunchCardComponent,
-  (previousProps, nextProps) =>
-    previousProps.onPress === nextProps.onPress &&
-    previousProps.lancamento.id === nextProps.lancamento.id &&
-    previousProps.lancamento.name === nextProps.lancamento.name &&
-    previousProps.lancamento.flight_number ===
-      nextProps.lancamento.flight_number &&
-    previousProps.lancamento.date_local === nextProps.lancamento.date_local &&
-    previousProps.lancamento.upcoming === nextProps.lancamento.upcoming &&
-    previousProps.lancamento.success === nextProps.lancamento.success &&
-    previousProps.lancamento.patchImage === nextProps.lancamento.patchImage,
-);
+export const LaunchCard = memo(LaunchCardComponent);
