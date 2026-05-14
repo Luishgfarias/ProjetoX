@@ -6,17 +6,24 @@ import { useAppTheme } from "../theme/ThemeProvider";
 export type SearchBarProps = {
   value: string;
   onChangeText: (value: string) => void;
+  onSubmitSearch?: (value: string) => void;
   placeholder?: string;
 };
 
 export function SearchBar({
   value,
   onChangeText,
+  onSubmitSearch,
   placeholder = "Buscar...",
 }: SearchBarProps) {
   const { colors } = useAppTheme();
 
   const handleSearchPress = () => {
+    if (onSubmitSearch) {
+      onSubmitSearch(value.trim());
+      return;
+    }
+
     onChangeText(value.trim());
   };
 

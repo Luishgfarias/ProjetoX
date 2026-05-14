@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ import {
   LAUNCH_LIST_PAGE_SIZE,
   MAX_TO_RENDER_PER_BATCH,
   NEXT_PAGE_TRIGGER_OFFSET,
+  SEARCH_DEBOUNCE_DELAY_MS,
   VIEWABILITY_ITEM_VISIBLE_PERCENT_THRESHOLD,
   WINDOW_SIZE,
 } from "../constants/launchList";
@@ -47,6 +48,7 @@ export default function LaunchListScreen({ navigation }: Props) {
     retryLaunches,
     setSearch,
   } = useLaunchStore();
+  const [searchInput, setSearchInput] = useState(search);
 
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -93,10 +95,37 @@ export default function LaunchListScreen({ navigation }: Props) {
 
   const handleSearch = useCallback(
     (text: string) => {
-      setSearch(text);
+      setSearchInput(text);
+
+      if (text.length === 0 && search !== "") {
+        void setSearch("");
+      }
     },
-    [setSearch],
+    [search, setSearch],
   );
+
+  const handleSubmitSearch = useCallback(
+    (text: string) => {
+      setSearchInput(text);
+
+      if (text !== search) {
+        void setSearch(text);
+      }
+    },
+    [search, setSearch],
+  );
+
+  useEffect(() => {
+    if (searchInput === search) return;
+
+    const timeoutId = setTimeout(() => {
+      void setSearch(searchInput);
+    }, SEARCH_DEBOUNCE_DELAY_MS);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [search, searchInput, setSearch]);
 
   const handleLaunchPress = useCallback(
     (id: string) => {
@@ -184,8 +213,9 @@ export default function LaunchListScreen({ navigation }: Props) {
       </View>
       <SearchBar
         placeholder="Buscar por nome da missão..."
-        value={search}
+        value={searchInput}
         onChangeText={handleSearch}
+        onSubmitSearch={handleSubmitSearch}
       />
       <FlatList
         data={launches}
