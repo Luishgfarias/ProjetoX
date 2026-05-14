@@ -48,11 +48,13 @@ function DetailRow({
   value: React.ReactNode;
 }) {
   return (
-    <View className="border-b border-gray-100 py-3">
-      <Text className="text-xs font-semibold uppercase text-gray-500">
+    <View className="border-b border-app-border py-3 dark:border-app-border-dark">
+      <Text className="text-xs font-semibold uppercase text-app-subtle dark:text-app-subtle-dark">
         {label}
       </Text>
-      <Text className="mt-1 text-base text-gray-900">{value}</Text>
+      <Text className="mt-1 text-base text-app-text dark:text-app-text-dark">
+        {value}
+      </Text>
     </View>
   );
 }
@@ -67,7 +69,7 @@ function InlineDetail({
   const displayValue = value ?? LAUNCH_FALLBACK_TEXT.unknown;
 
   return (
-    <Text className="text-sm text-gray-700">
+    <Text className="text-sm text-app-muted dark:text-app-muted-dark">
       {label}: {displayValue}
     </Text>
   );
@@ -82,8 +84,10 @@ function Section({
 }) {
   return (
     <View className="mb-6">
-      <Text className="mb-3 text-lg font-semibold text-gray-950">{title}</Text>
-      <View className="rounded-lg border border-gray-200 bg-white px-4">
+      <Text className="mb-3 text-lg font-semibold text-app-text dark:text-app-text-dark">
+        {title}
+      </Text>
+      <View className="rounded-lg border border-app-border bg-app-surface px-4 dark:border-app-border-dark dark:bg-app-surface-dark">
         {children}
       </View>
     </View>
@@ -96,13 +100,15 @@ function LinkRow({ label, url }: { label: string; url: string | null }) {
   return (
     <Pressable
       accessibilityRole="link"
-      className="border-b border-gray-100 py-3 active:bg-gray-50"
+      className="border-b border-app-border py-3 active:bg-app-surface-muted dark:border-app-border-dark dark:active:bg-app-surface-muted-dark"
       onPress={() => Linking.openURL(url)}
     >
-      <Text className="text-xs font-semibold uppercase text-gray-500">
+      <Text className="text-xs font-semibold uppercase text-app-subtle dark:text-app-subtle-dark">
         {label}
       </Text>
-      <Text className="mt-1 text-base font-medium text-blue-700">{url}</Text>
+      <Text className="mt-1 text-base font-medium text-app-accent dark:text-app-accent-dark">
+        {url}
+      </Text>
     </Pressable>
   );
 }
@@ -120,10 +126,12 @@ function ArticleButton({
     <Pressable
       accessibilityLabel="Ler artigo"
       accessibilityRole="button"
-      className="my-3 rounded-full bg-gray-900 px-4 py-3 active:bg-gray-700"
+      className="my-3 rounded-full bg-app-primary px-4 py-3 active:bg-app-primary-pressed dark:bg-app-primary-dark dark:active:bg-app-primary-pressed-dark"
       onPress={() => onPress(url)}
     >
-      <Text className="text-center font-semibold text-white">Ler artigo</Text>
+      <Text className="text-center font-semibold text-white dark:text-gray-950">
+        Ler artigo
+      </Text>
     </Pressable>
   );
 }
@@ -194,7 +202,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-white">
+      <View className="flex-1 items-center justify-center bg-app-background dark:bg-app-background-dark">
         <LoadingState text="Carregando detalhes..." />
       </View>
     );
@@ -202,7 +210,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
 
   if (error) {
     return (
-      <View className="flex-1 items-center justify-center bg-white p-4">
+      <View className="flex-1 items-center justify-center bg-app-background p-4 dark:bg-app-background-dark">
         <ErrorState
           message={error}
           onRetry={fetchLaunch}
@@ -214,17 +222,19 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
 
   if (emptyMessage || !launch) {
     return (
-      <View className="flex-1 items-center justify-center bg-white p-4">
-        <Text className="mb-4 text-center text-lg font-medium text-stone-700">
+      <View className="flex-1 items-center justify-center bg-app-background p-4 dark:bg-app-background-dark">
+        <Text className="mb-4 text-center text-lg font-medium text-app-muted dark:text-app-muted-dark">
           {emptyMessage ?? LAUNCH_EMPTY_MESSAGES.details}
         </Text>
         <Pressable
           accessibilityLabel="Voltar"
           accessibilityRole="button"
-          className="rounded-full bg-gray-900 px-4 py-2.5 active:bg-gray-700"
+          className="rounded-full bg-app-primary px-4 py-2.5 active:bg-app-primary-pressed dark:bg-app-primary-dark dark:active:bg-app-primary-pressed-dark"
           onPress={navigation.goBack}
         >
-          <Text className="text-center font-semibold text-white">Voltar</Text>
+          <Text className="text-center font-semibold text-white dark:text-gray-950">
+            Voltar
+          </Text>
         </Pressable>
       </View>
     );
@@ -242,8 +252,8 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
   const articleUrl = launch.links?.article ?? null;
 
   return (
-    <ScrollView className="flex-1 bg-white p-4">
-      <View className="mb-6 rounded-lg border border-gray-200 bg-slate-50 p-5">
+    <ScrollView className="flex-1 bg-app-background p-4 dark:bg-app-background-dark">
+      <View className="mb-6 rounded-lg border border-app-border bg-app-surface p-5 dark:border-app-border-dark dark:bg-app-surface-dark">
         <Image
           className="mb-4 h-36 w-full rounded-lg"
           resizeMode="contain"
@@ -253,8 +263,10 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
               : require("../../public/noMissionImage.png")
           }
         />
-        <Text className="text-2xl font-bold text-gray-950">{launch.name}</Text>
-        <Text className="mt-1 text-base text-gray-600">
+        <Text className="text-2xl font-bold text-app-text dark:text-app-text-dark">
+          {launch.name}
+        </Text>
+        <Text className="mt-1 text-base text-app-muted dark:text-app-muted-dark">
           Voo #{launch.flight_number ?? LAUNCH_FALLBACK_TEXT.unknown}
         </Text>
         <View className="mt-3 self-start">
@@ -268,7 +280,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
 
       <Section title="Detalhes">
         <View className="py-3">
-          <Text className="text-base leading-6 text-gray-800">
+          <Text className="text-base leading-6 text-app-text dark:text-app-text-dark">
             {launch.details ?? LAUNCH_FALLBACK_TEXT.noDetails}
           </Text>
         </View>
@@ -311,10 +323,10 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
         {cores.length ? (
           cores.map((core, index) => (
             <View
-              className="border-b border-gray-100 py-3"
+              className="border-b border-app-border py-3 dark:border-app-border-dark"
               key={`${core.core ?? "core"}-${index}`}
             >
-              <Text className="mb-2 text-base font-semibold text-gray-900">
+              <Text className="mb-2 text-base font-semibold text-app-text dark:text-app-text-dark">
                 Core {index + 1}
               </Text>
               <InlineDetail label="ID" value={core.core} />
@@ -344,7 +356,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
         {failures.length ? (
           failures.map((failure, index) => (
             <View
-              className="border-b border-rose-100 bg-rose-50 px-3 py-3"
+              className="border-b border-rose-200 bg-rose-50 px-3 py-3 dark:border-rose-900 dark:bg-rose-950/60"
               key={`${failure.time ?? "failure"}-${index}`}
             >
               <InlineDetail label="Tempo" value={failure.time} />
@@ -434,7 +446,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
       </Section>
 
       <View className="mb-8">
-        <Text className="text-center text-xs text-gray-500">
+        <Text className="text-center text-xs text-app-subtle dark:text-app-subtle-dark">
           ID do lançamento: {launch.id}
         </Text>
       </View>

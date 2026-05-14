@@ -8,19 +8,21 @@ export type LaunchStatus = {
 export const LAUNCH_STATUS = {
   upcoming: {
     label: "Agendado",
-    className: "bg-sky-100 text-slate-700",
+    className: "bg-sky-100 text-sky-800 dark:bg-sky-950 dark:text-sky-200",
   },
   success: {
     label: "Sucesso",
-    className: "bg-emerald-50 text-stone-600",
+    className:
+      "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200",
   },
   failure: {
     label: "Falha",
-    className: "bg-rose-50 text-stone-600",
+    className: "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-200",
   },
   unknown: {
     label: "Indefinido",
-    className: "bg-gray-100 text-gray-700",
+    className:
+      "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-200",
   },
 } as const satisfies Record<string, LaunchStatus>;
 

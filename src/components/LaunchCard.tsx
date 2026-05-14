@@ -14,7 +14,7 @@ function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
 
   return (
     <Pressable
-      className="mb-3 flex-row items-center rounded-lg border border-gray-200 bg-slate-50 p-4 shadow-sm active:bg-slate-100"
+      className="mb-3 flex-row items-center rounded-lg border border-app-border bg-app-surface p-4 shadow-sm active:bg-app-surface-muted dark:border-app-border-dark dark:bg-app-surface-dark dark:active:bg-app-surface-muted-dark"
       onPress={() => onPress(lancamento.id)}
     >
       {lancamento.patchImage ? (
@@ -33,7 +33,7 @@ function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
 
       <View className="min-w-0 flex-1">
         <View className="mb-2 flex-row items-start justify-between">
-          <Text className="mr-3 flex-1 text-lg font-semibold text-gray-900">
+          <Text className="mr-3 flex-1 text-lg font-semibold text-app-text dark:text-app-text-dark">
             {lancamento.name}
           </Text>
           <Text
@@ -43,10 +43,10 @@ function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
           </Text>
         </View>
 
-        <Text className="text-sm text-gray-600">
+        <Text className="text-sm text-app-muted dark:text-app-muted-dark">
           Voo #{lancamento.flight_number}
         </Text>
-        <Text className="mt-1 text-sm text-gray-600">
+        <Text className="mt-1 text-sm text-app-muted dark:text-app-muted-dark">
           Data: {formattedDate}
         </Text>
       </View>

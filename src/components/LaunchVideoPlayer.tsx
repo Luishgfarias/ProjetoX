@@ -64,10 +64,10 @@ function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
   if (youtubeWatchUrl) {
     return (
       <View className="mb-6">
-        <Text className="mb-3 text-lg font-semibold text-gray-950">
+        <Text className="mb-3 text-lg font-semibold text-app-text dark:text-app-text-dark">
           Vídeo do lançamento
         </Text>
-        <View className="overflow-hidden rounded-lg border border-gray-200 bg-black">
+        <View className="overflow-hidden rounded-lg border border-app-border bg-black dark:border-app-border-dark">
           <WebView
             allowsFullscreenVideo
             allowsInlineMediaPlayback
@@ -87,21 +87,21 @@ function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
   if (!source) {
     return (
       <View className="mb-6">
-        <Text className="mb-3 text-lg font-semibold text-gray-950">
+        <Text className="mb-3 text-lg font-semibold text-app-text dark:text-app-text-dark">
           Vídeo do lançamento
         </Text>
         <Pressable
           accessibilityRole="link"
-          className="overflow-hidden rounded-lg border border-gray-200 bg-gray-950 active:opacity-90"
+          className="overflow-hidden rounded-lg border border-app-border bg-app-primary active:opacity-90 dark:border-app-border-dark dark:bg-app-primary-dark"
           onPress={() => Linking.openURL(videoUrl)}
         >
           <View className="aspect-video w-full items-center justify-center px-6">
-            <Text className="text-center text-base font-semibold text-white">
+            <Text className="text-center text-base font-semibold text-white dark:text-gray-950">
               Abrir vídeo do lançamento
             </Text>
           </View>
         </Pressable>
-        <Text className="mt-2 text-sm text-gray-600">
+        <Text className="mt-2 text-sm text-app-muted dark:text-app-muted-dark">
           Não foi possível embutir este formato de vídeo.
         </Text>
       </View>
@@ -110,10 +110,10 @@ function LaunchVideoPlayerComponent({ videoUrl }: LaunchVideoPlayerProps) {
 
   return (
     <View className="mb-6">
-      <Text className="mb-3 text-lg font-semibold text-gray-950">
+      <Text className="mb-3 text-lg font-semibold text-app-text dark:text-app-text-dark">
         Vídeo do lançamento
       </Text>
-      <View className="overflow-hidden rounded-lg border border-gray-200 bg-black">
+      <View className="overflow-hidden rounded-lg border border-app-border bg-black dark:border-app-border-dark">
         <VideoView
           allowsFullscreen
           contentFit="contain"

@@ -11,11 +11,11 @@ export default function ArticleWebViewScreen({ route }: Props) {
   const { url } = route.params;
 
   return (
-    <View className="flex-1 bg-white">
+    <View className="flex-1 bg-app-background dark:bg-app-background-dark">
       <WebView
         originWhitelist={["http://*", "https://*"]}
         renderLoading={() => (
-          <View className="flex-1 items-center justify-center bg-white">
+          <View className="flex-1 items-center justify-center bg-app-background dark:bg-app-background-dark">
             <LoadingState text="Carregando artigo..." />
           </View>
         )}

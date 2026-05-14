@@ -17,16 +17,18 @@ export function EmptyState({ search = "" }: EmptyStateProps) {
 
   return (
     <View className="items-center justify-center px-6 py-12">
-      <Text className="text-center text-lg font-semibold text-gray-900">
+      <Text className="text-center text-lg font-semibold text-app-text dark:text-app-text-dark">
         {hasSearch
           ? "Nenhum lançamento encontrado"
           : "Ainda não há lançamentos por aqui"}
       </Text>
-      <Text className="mt-2 text-center text-sm leading-5 text-gray-600">
+      <Text className="mt-2 text-center text-sm leading-5 text-app-muted dark:text-app-muted-dark">
         {hasSearch ? (
           <>
             Terra chamando{" "}
-            <Text className="font-semibold text-gray-800">{trimmedSearch}</Text>
+            <Text className="font-semibold text-app-text dark:text-app-text-dark">
+              {trimmedSearch}
+            </Text>
             ... nenhuma missão respondeu.
           </>
         ) : (

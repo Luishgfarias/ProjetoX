@@ -5,11 +5,14 @@ import {
   FlatList,
   ActivityIndicator,
   RefreshControl,
+  Pressable,
   ViewToken,
   ListRenderItem,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useColorScheme } from "nativewind";
+import { MaterialIcons } from "@expo/vector-icons";
 import { RootStackParamList } from "../navigation/types";
 import { useLaunchStore } from "../store/launchStore";
 import { LaunchCard as LaunchCardType } from "../@types/launch";
@@ -18,19 +21,31 @@ import { ErrorState } from "../components/ErrorState";
 import { LaunchCard } from "../components/LaunchCard";
 import { LoadingState } from "../components/LoadingState";
 import { SearchBar } from "../components/SearchBar";
+import { saveThemePreference } from "../storage/themeStorage";
 import {
   INITIAL_NUM_TO_RENDER,
   LAUNCH_LIST_PAGE_SIZE,
-  LIST_FOOTER_INDICATOR_COLOR,
   MAX_TO_RENDER_PER_BATCH,
   NEXT_PAGE_TRIGGER_OFFSET,
   VIEWABILITY_ITEM_VISIBLE_PERCENT_THRESHOLD,
   WINDOW_SIZE,
 } from "../constants/launchList";
+import {
+  DARK_LOADING_INDICATOR_COLOR,
+  LOADING_INDICATOR_COLOR,
+  THEME_SWITCH_ICON_DARK_COLOR,
+  THEME_SWITCH_ICON_LIGHT_COLOR,
+  THEME_SWITCH_THUMB_DARK_COLOR,
+  THEME_SWITCH_THUMB_LIGHT_COLOR,
+} from "../constants/theme";
 
 type Props = NativeStackScreenProps<RootStackParamList, "LaunchList">;
 
 export default function LaunchListScreen({ navigation }: Props) {
+  const { colorScheme, setColorScheme } = useColorScheme();
+  const isDarkTheme = colorScheme === "dark";
+  const indicatorColor =
+    isDarkTheme ? DARK_LOADING_INDICATOR_COLOR : LOADING_INDICATOR_COLOR;
   const {
     launches,
     hasNextPage,
@@ -102,6 +117,15 @@ export default function LaunchListScreen({ navigation }: Props) {
     [navigation],
   );
 
+  const handleThemeChange = useCallback(
+    (enabled: boolean) => {
+      const preference = enabled ? "dark" : "light";
+      setColorScheme(preference);
+      void saveThemePreference(preference);
+    },
+    [setColorScheme],
+  );
+
   const renderItem = useCallback<ListRenderItem<LaunchCardType>>(
     ({ item }) => <LaunchCard lancamento={item} onPress={handleLaunchPress} />,
     [handleLaunchPress],
@@ -111,7 +135,7 @@ export default function LaunchListScreen({ navigation }: Props) {
     if (isLoadingMore) {
       return (
         <View className="py-4">
-          <ActivityIndicator size="small" color={LIST_FOOTER_INDICATOR_COLOR} />
+          <ActivityIndicator size="small" color={indicatorColor} />
         </View>
       );
     }
@@ -119,7 +143,7 @@ export default function LaunchListScreen({ navigation }: Props) {
     if (!hasNextPage && launches.length > 0) {
       return (
         <View className="items-center px-6 py-6">
-          <Text className="text-center text-sm font-medium text-gray-500">
+          <Text className="text-center text-sm font-medium text-app-subtle dark:text-app-subtle-dark">
             Fim da rota, comandante. Sem mais missões por enquanto.
           </Text>
         </View>
@@ -142,8 +166,44 @@ export default function LaunchListScreen({ navigation }: Props) {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-white p-4">
-      <Text className="text-2xl font-bold mb-4">Listagem de Lançamentos</Text>
+    <SafeAreaView className="flex-1 bg-app-background p-4 dark:bg-app-background-dark">
+      <View className="mb-4 flex-row items-center justify-between gap-4">
+        <Text className="min-w-0 flex-1 text-2xl font-bold text-app-text dark:text-app-text-dark">
+          Listagem de Lançamentos
+        </Text>
+        <View className="flex-row items-center">
+          <Pressable
+            accessibilityLabel={
+              isDarkTheme ? "Ativar tema claro" : "Ativar tema escuro"
+            }
+            accessibilityRole="switch"
+            accessibilityState={{ checked: isDarkTheme }}
+            className="h-9 w-16 justify-center rounded-full bg-slate-300 px-1.5 active:opacity-80 dark:bg-slate-700"
+            onPress={() => handleThemeChange(!isDarkTheme)}
+          >
+            <View
+              className={`h-7 w-7 items-center justify-center rounded-full ${
+                isDarkTheme ? "self-end" : "self-start"
+              }`}
+              style={{
+                backgroundColor: isDarkTheme
+                  ? THEME_SWITCH_THUMB_DARK_COLOR
+                  : THEME_SWITCH_THUMB_LIGHT_COLOR,
+              }}
+            >
+              <MaterialIcons
+                name={isDarkTheme ? "dark-mode" : "light-mode"}
+                size={18}
+                color={
+                  isDarkTheme
+                    ? THEME_SWITCH_ICON_DARK_COLOR
+                    : THEME_SWITCH_ICON_LIGHT_COLOR
+                }
+              />
+            </View>
+          </Pressable>
+        </View>
+      </View>
       <SearchBar
         placeholder="Buscar por nome da missão..."
         value={search}
@@ -165,6 +225,7 @@ export default function LaunchListScreen({ navigation }: Props) {
           <RefreshControl
             refreshing={isRefreshing}
             onRefresh={refreshLaunches}
+            tintColor={indicatorColor}
           />
         }
       />
