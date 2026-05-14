@@ -27,9 +27,6 @@
       "bundler": "metro",
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      "expo-video"
-    ],
     "extra": {
       "eas": {
         "projectId": "02c94047-7279-4eae-bfd1-2300aa5ddfed"

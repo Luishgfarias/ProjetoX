@@ -53,7 +53,14 @@ export type LaunchLinks = {
   reddit: LaunchRedditLinks;
   flickr: LaunchFlickrLinks;
   presskit: string | null;
-  webcast: string | null;
+  webcast:
+    | string
+    | number
+    | null
+    | {
+        uri?: string;
+        assetId?: number;
+      };
   youtube_id: string | null;
   article: string | null;
   wikipedia: string | null;
@@ -94,16 +101,15 @@ export type LaunchCore = {
   landpad: string | null;
 };
 
-export type LaunchCard =
-  Pick<
-    Launch,
-    | "id"
-    | "name"
-    | "flight_number"
-    | "date_utc"
-    | "date_local"
-    | "upcoming"
-    | "success"
-  > & {
-    patchImage: string | null;
-  };
+export type LaunchCard = Pick<
+  Launch,
+  | "id"
+  | "name"
+  | "flight_number"
+  | "date_utc"
+  | "date_local"
+  | "upcoming"
+  | "success"
+> & {
+  patchImage: string | null;
+};

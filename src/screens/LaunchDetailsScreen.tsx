@@ -420,7 +420,14 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
             })
           }
         />
-        <LinkRow label="Transmissão" url={launch.links?.webcast ?? null} />
+        <LinkRow
+          label="Transmissão"
+          url={
+            typeof launch.links?.webcast === "string"
+              ? launch.links.webcast
+              : null
+          }
+        />
         <LinkRow label="Wikipedia" url={launch.links?.wikipedia ?? null} />
         <LinkRow label="Presskit" url={launch.links?.presskit ?? null} />
         <LinkRow
