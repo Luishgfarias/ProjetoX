@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useCallback, useMemo } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { LaunchCard as LancamentoCard } from "../@types/launch";
 import { getLaunchStatus } from "../constants/launchStatus";
@@ -9,27 +9,32 @@ export type LaunchCardProps = {
 };
 
 function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
-  const status = getLaunchStatus(lancamento);
-  const formattedDate = new Date(lancamento.date_local).toLocaleDateString();
+  const status = useMemo(() => getLaunchStatus(lancamento), [lancamento]);
+  const formattedDate = useMemo(
+    () => new Date(lancamento.date_local).toLocaleDateString(),
+    [lancamento.date_local],
+  );
+  const imageSource = useMemo(
+    () =>
+      lancamento.patchImage
+        ? { uri: lancamento.patchImage }
+        : require("../../assets/noMissionImage.png"),
+    [lancamento.patchImage],
+  );
+  const handlePress = useCallback(() => {
+    onPress(lancamento.id);
+  }, [lancamento.id, onPress]);
 
   return (
     <Pressable
       className="mb-3 flex-row items-center rounded-lg border border-app-border bg-app-surface p-4 shadow-sm active:bg-app-surface-muted dark:border-app-border-dark dark:bg-app-surface-dark dark:active:bg-app-surface-muted-dark"
-      onPress={() => onPress(lancamento.id)}
+      onPress={handlePress}
     >
-      {lancamento.patchImage ? (
-        <Image
-          className="mr-4 h-16 w-16 rounded-md"
-          resizeMode="contain"
-          source={{ uri: lancamento.patchImage }}
-        />
-      ) : (
-        <Image
-          className="mr-4 h-16 w-16 rounded-md"
-          resizeMode="contain"
-          source={require("../../assets/noMissionImage.png")}
-        />
-      )}
+      <Image
+        className="mr-4 h-16 w-16 rounded-md"
+        resizeMode="contain"
+        source={imageSource}
+      />
 
       <View className="min-w-0 flex-1">
         <View className="mb-2 flex-row items-start justify-between">
@@ -54,4 +59,16 @@ function LaunchCardComponent({ lancamento, onPress }: LaunchCardProps) {
   );
 }
 
-export const LaunchCard = memo(LaunchCardComponent);
+export const LaunchCard = memo(
+  LaunchCardComponent,
+  (previousProps, nextProps) =>
+    previousProps.onPress === nextProps.onPress &&
+    previousProps.lancamento.id === nextProps.lancamento.id &&
+    previousProps.lancamento.name === nextProps.lancamento.name &&
+    previousProps.lancamento.flight_number ===
+      nextProps.lancamento.flight_number &&
+    previousProps.lancamento.date_local === nextProps.lancamento.date_local &&
+    previousProps.lancamento.upcoming === nextProps.lancamento.upcoming &&
+    previousProps.lancamento.success === nextProps.lancamento.success &&
+    previousProps.lancamento.patchImage === nextProps.lancamento.patchImage,
+);

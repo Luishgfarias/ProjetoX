@@ -1,5 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import axios from "axios";
+import React from "react";
 import {
   View,
   Text,
@@ -11,18 +10,15 @@ import {
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
-import { getLaunchById } from "../services/launchService";
-import { Launch } from "../@types/launch";
 import { ErrorState } from "../components/ErrorState";
 import { LaunchVideoPlayer } from "../components/LaunchVideoPlayer";
 import { LoadingState } from "../components/LoadingState";
 import {
   LAUNCH_EMPTY_MESSAGES,
-  LAUNCH_ERROR_MESSAGES,
   LAUNCH_FALLBACK_TEXT,
 } from "../constants/launchMessages";
 import { getLaunchStatus } from "../constants/launchStatus";
-import { useLaunchStore } from "../store/launchStore";
+import { useLaunchDetails } from "../hooks/useLaunchDetails";
 
 type Props = NativeStackScreenProps<RootStackParamList, "LaunchDetails">;
 
@@ -141,67 +137,8 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
   const { id } = route.params;
   const { height } = useWindowDimensions();
   const bottomContentGap = height / 5;
-  const cachedLaunch = useLaunchStore((state) => state.launchDetailsById[id]);
-  const setLaunchDetail = useLaunchStore((state) => state.setLaunchDetail);
-  const [launch, setLaunch] = useState<Launch | null>(cachedLaunch ?? null);
-  const [loading, setLoading] = useState(!cachedLaunch);
-  const [error, setError] = useState<string | null>(null);
-  const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
-  const isMountedRef = useRef(true);
-  const requestIdRef = useRef(0);
-
-  const fetchLaunch = useCallback(async () => {
-    if (cachedLaunch) {
-      setLaunch(cachedLaunch);
-      setLoading(false);
-      setError(null);
-      setEmptyMessage(null);
-      return;
-    }
-
-    const requestId = requestIdRef.current + 1;
-    requestIdRef.current = requestId;
-
-    setLaunch(null);
-    setLoading(true);
-    setError(null);
-    setEmptyMessage(null);
-
-    const canUpdate = () =>
-      isMountedRef.current && requestId === requestIdRef.current;
-
-    try {
-      const data = await getLaunchById(id);
-      if (!canUpdate()) return;
-      setLaunchDetail(data);
-      setLaunch(data);
-    } catch (requestError) {
-      if (!canUpdate()) return;
-
-      if (
-        axios.isAxiosError(requestError) &&
-        requestError.response?.status === 404
-      ) {
-        setEmptyMessage(LAUNCH_ERROR_MESSAGES.notFound);
-        return;
-      }
-
-      setError(LAUNCH_ERROR_MESSAGES.details);
-    } finally {
-      if (!canUpdate()) return;
-      setLoading(false);
-    }
-  }, [cachedLaunch, id, setLaunchDetail]);
-
-  useEffect(() => {
-    fetchLaunch();
-  }, [fetchLaunch]);
-
-  useEffect(() => {
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
+  const { launch, loading, error, emptyMessage, fetchLaunch } =
+    useLaunchDetails(id);
 
   if (loading) {
     return (

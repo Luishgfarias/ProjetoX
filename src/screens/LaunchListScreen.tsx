@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,38 +6,32 @@ import {
   ActivityIndicator,
   RefreshControl,
   Pressable,
-  ViewToken,
   ListRenderItem,
-  BackHandler,
 } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { RootStackParamList } from "../navigation/types";
-import { useLaunchStore } from "../store/launchStore";
 import { LaunchCard as LaunchCardType } from "../@types/launch";
 import { EmptyState } from "../components/EmptyState";
 import { ErrorState } from "../components/ErrorState";
 import { LaunchCard } from "../components/LaunchCard";
 import { LoadingState } from "../components/LoadingState";
 import { SearchBar } from "../components/SearchBar";
+import { useDoubleBackExit } from "../hooks/useDoubleBackExit";
+import { useSearchLaunches } from "../hooks/useSearchLaunches";
 import { useAppTheme } from "../theme/ThemeProvider";
 import {
   INITIAL_NUM_TO_RENDER,
-  LAUNCH_LIST_PAGE_SIZE,
   MAX_TO_RENDER_PER_BATCH,
-  NEXT_PAGE_TRIGGER_OFFSET,
-  SEARCH_DEBOUNCE_DELAY_MS,
-  VIEWABILITY_ITEM_VISIBLE_PERCENT_THRESHOLD,
   WINDOW_SIZE,
 } from "../constants/launchList";
 
 type Props = NativeStackScreenProps<RootStackParamList, "LaunchList">;
-const EXIT_HINT_TIMEOUT_MS = 2500;
 
 export default function LaunchListScreen({ navigation }: Props) {
   const { colors, isDark, toggleThemePreference } = useAppTheme();
+  const { isExitHintVisible } = useDoubleBackExit();
   const {
     launches,
     hasNextPage,
@@ -46,133 +40,14 @@ export default function LaunchListScreen({ navigation }: Props) {
     isRefreshing,
     error,
     search,
-    loadInitialLaunches,
+    searchInput,
     refreshLaunches,
     retryLaunches,
-    setSearch,
-  } = useLaunchStore();
-  const [searchInput, setSearchInput] = useState(search);
-  const [isExitHintVisible, setIsExitHintVisible] = useState(false);
-  const shouldExitOnBackPress = useRef(false);
-  const exitHintTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const onViewableItemsChanged = useRef(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      const maxVisibleIndex = viewableItems.reduce((maxIndex, item) => {
-        if (typeof item.index !== "number") return maxIndex;
-        return Math.max(maxIndex, item.index);
-      }, -1);
-      if (maxVisibleIndex < 0) return;
-
-      const {
-        page,
-        hasNextPage,
-        isLoading,
-        isLoadingMore,
-        isRefreshing,
-        error,
-        launches,
-        loadMoreLaunches,
-      } = useLaunchStore.getState();
-      const nextPageTriggerIndex =
-        page * LAUNCH_LIST_PAGE_SIZE - NEXT_PAGE_TRIGGER_OFFSET;
-
-      if (
-        maxVisibleIndex >= nextPageTriggerIndex &&
-        launches.length > 0 &&
-        hasNextPage &&
-        !isLoading &&
-        !isLoadingMore &&
-        !isRefreshing &&
-        !error
-      ) {
-        loadMoreLaunches();
-      }
-    },
-  ).current;
-
-  const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: VIEWABILITY_ITEM_VISIBLE_PERCENT_THRESHOLD,
-  }).current;
-
-  useEffect(() => {
-    loadInitialLaunches();
-  }, [loadInitialLaunches]);
-
-  useFocusEffect(
-    useCallback(() => {
-      const clearExitHint = () => {
-        shouldExitOnBackPress.current = false;
-        setIsExitHintVisible(false);
-
-        if (exitHintTimeoutRef.current) {
-          clearTimeout(exitHintTimeoutRef.current);
-          exitHintTimeoutRef.current = null;
-        }
-      };
-
-      const backSubscription = BackHandler.addEventListener(
-        "hardwareBackPress",
-        () => {
-          if (shouldExitOnBackPress.current) {
-            clearExitHint();
-            BackHandler.exitApp();
-            return true;
-          }
-
-          shouldExitOnBackPress.current = true;
-          setIsExitHintVisible(true);
-
-          exitHintTimeoutRef.current = setTimeout(() => {
-            shouldExitOnBackPress.current = false;
-            setIsExitHintVisible(false);
-            exitHintTimeoutRef.current = null;
-          }, EXIT_HINT_TIMEOUT_MS);
-
-          return true;
-        },
-      );
-
-      return () => {
-        backSubscription.remove();
-        clearExitHint();
-      };
-    }, []),
-  );
-
-  const handleSearch = useCallback(
-    (text: string) => {
-      setSearchInput(text);
-
-      if (text.length === 0 && search !== "") {
-        void setSearch("");
-      }
-    },
-    [search, setSearch],
-  );
-
-  const handleSubmitSearch = useCallback(
-    (text: string) => {
-      setSearchInput(text);
-
-      if (text !== search) {
-        void setSearch(text);
-      }
-    },
-    [search, setSearch],
-  );
-
-  useEffect(() => {
-    if (searchInput === search) return;
-
-    const timeoutId = setTimeout(() => {
-      void setSearch(searchInput);
-    }, SEARCH_DEBOUNCE_DELAY_MS);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [search, searchInput, setSearch]);
+    handleSearch,
+    handleSubmitSearch,
+    onViewableItemsChanged,
+    viewabilityConfig,
+  } = useSearchLaunches();
 
   const handleLaunchPress = useCallback(
     (id: string) => {
@@ -190,7 +65,7 @@ export default function LaunchListScreen({ navigation }: Props) {
     [handleLaunchPress],
   );
 
-  const renderFooter = () => {
+  const renderFooter = useCallback(() => {
     if (isLoadingMore) {
       return (
         <View className="py-4">
@@ -210,9 +85,9 @@ export default function LaunchListScreen({ navigation }: Props) {
     }
 
     return null;
-  };
+  }, [colors.loadingIndicator, hasNextPage, isLoadingMore, launches.length]);
 
-  const renderEmpty = () => {
+  const renderEmpty = useCallback(() => {
     if (isLoading) {
       return <LoadingState text="Carregando lançamentos..." />;
     }
@@ -222,7 +97,18 @@ export default function LaunchListScreen({ navigation }: Props) {
     }
 
     return <EmptyState search={search} />;
-  };
+  }, [error, isLoading, retryLaunches, search]);
+
+  const refreshControl = useMemo(
+    () => (
+      <RefreshControl
+        refreshing={isRefreshing}
+        onRefresh={refreshLaunches}
+        tintColor={colors.loadingIndicator}
+      />
+    ),
+    [colors.loadingIndicator, isRefreshing, refreshLaunches],
+  );
 
   return (
     <SafeAreaView className="flex-1 bg-app-background p-4 dark:bg-app-background-dark">
@@ -276,13 +162,7 @@ export default function LaunchListScreen({ navigation }: Props) {
         ListFooterComponent={renderFooter}
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
-        refreshControl={
-          <RefreshControl
-            refreshing={isRefreshing}
-            onRefresh={refreshLaunches}
-            tintColor={colors.loadingIndicator}
-          />
-        }
+        refreshControl={refreshControl}
       />
       {isExitHintVisible ? (
         <View
