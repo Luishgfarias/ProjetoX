@@ -7,6 +7,7 @@ import {
   Image,
   Pressable,
   Linking,
+  useWindowDimensions,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { RootStackParamList } from "../navigation/types";
@@ -138,6 +139,8 @@ function ArticleButton({
 
 export default function LaunchDetailsScreen({ route, navigation }: Props) {
   const { id } = route.params;
+  const { height } = useWindowDimensions();
+  const bottomContentGap = height / 5;
   const cachedLaunch = useLaunchStore((state) => state.launchDetailsById[id]);
   const setLaunchDetail = useLaunchStore((state) => state.setLaunchDetail);
   const [launch, setLaunch] = useState<Launch | null>(cachedLaunch ?? null);
@@ -252,10 +255,13 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
   const articleUrl = launch.links?.article ?? null;
 
   return (
-    <ScrollView className="flex-1 bg-app-background p-4 dark:bg-app-background-dark">
+    <ScrollView
+      className="flex-1 bg-app-background p-4 dark:bg-app-background-dark"
+      contentContainerStyle={{ paddingBottom: bottomContentGap }}
+    >
       <View className="mb-6 rounded-lg border border-app-border bg-app-surface p-5 dark:border-app-border-dark dark:bg-app-surface-dark">
         <Image
-          className="mb-4 h-36 w-full rounded-lg"
+          className="mb-4 h-36 w-full rounded-2xl"
           resizeMode="contain"
           source={
             patchImage
@@ -277,14 +283,6 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
           </Text>
         </View>
       </View>
-
-      <Section title="Detalhes">
-        <View className="py-3">
-          <Text className="text-base leading-6 text-app-text dark:text-app-text-dark">
-            {launch.details ?? LAUNCH_FALLBACK_TEXT.noDetails}
-          </Text>
-        </View>
-      </Section>
 
       <LaunchVideoPlayer videoUrl={launch.links?.webcast ?? null} />
 
@@ -313,6 +311,14 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
               : LAUNCH_FALLBACK_TEXT.unknown
           }
         />
+      </Section>
+
+      <Section title="Detalhes">
+        <View className="py-3">
+          <Text className="text-base leading-6 text-app-text dark:text-app-text-dark">
+            {launch.details ?? LAUNCH_FALLBACK_TEXT.noDetails}
+          </Text>
+        </View>
       </Section>
 
       <Section title="Payloads">

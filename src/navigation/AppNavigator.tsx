@@ -1,25 +1,25 @@
-import React from 'react';
+import React from "react";
 import {
   DarkTheme,
   DefaultTheme,
   NavigationContainer,
-} from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { useColorScheme } from 'nativewind';
-import { RootStackParamList } from './types';
-import LaunchListScreen from '../screens/LaunchListScreen';
-import LaunchDetailsScreen from '../screens/LaunchDetailsScreen';
-import ArticleWebViewScreen from '../screens/ArticleWebViewScreen';
+} from "@react-navigation/native";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useColorScheme } from "nativewind";
+import { RootStackParamList } from "./types";
+import LaunchListScreen from "../screens/LaunchListScreen";
+import LaunchDetailsScreen from "../screens/LaunchDetailsScreen";
+import ArticleWebViewScreen from "../screens/ArticleWebViewScreen";
 import {
   NAVIGATION_DARK_THEME,
   NAVIGATION_LIGHT_THEME,
-} from '../constants/theme';
+} from "../constants/theme";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function AppNavigator() {
   const { colorScheme } = useColorScheme();
-  const isDark = colorScheme === 'dark';
+  const isDark = colorScheme === "dark";
   const navigationTheme = {
     ...(isDark ? DarkTheme : DefaultTheme),
     colors: {
@@ -39,13 +39,13 @@ export default function AppNavigator() {
         <Stack.Screen
           name="LaunchDetails"
           component={LaunchDetailsScreen}
-          options={{ title: 'Detalhes do Lançamento' }}
+          options={{ title: "Detalhes da missão" }}
         />
         <Stack.Screen
           name="ArticleWebView"
           component={ArticleWebViewScreen}
           options={({ route }) => ({
-            title: route.params.title ?? 'Artigo',
+            title: route.params.title ?? "Artigo",
           })}
         />
       </Stack.Navigator>

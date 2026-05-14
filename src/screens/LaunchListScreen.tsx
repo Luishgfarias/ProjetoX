@@ -44,8 +44,9 @@ type Props = NativeStackScreenProps<RootStackParamList, "LaunchList">;
 export default function LaunchListScreen({ navigation }: Props) {
   const { colorScheme, setColorScheme } = useColorScheme();
   const isDarkTheme = colorScheme === "dark";
-  const indicatorColor =
-    isDarkTheme ? DARK_LOADING_INDICATOR_COLOR : LOADING_INDICATOR_COLOR;
+  const indicatorColor = isDarkTheme
+    ? DARK_LOADING_INDICATOR_COLOR
+    : LOADING_INDICATOR_COLOR;
   const {
     launches,
     hasNextPage,
@@ -168,8 +169,11 @@ export default function LaunchListScreen({ navigation }: Props) {
   return (
     <SafeAreaView className="flex-1 bg-app-background p-4 dark:bg-app-background-dark">
       <View className="mb-4 flex-row items-center justify-between gap-4">
-        <Text className="min-w-0 flex-1 text-2xl font-bold text-app-text dark:text-app-text-dark">
-          Listagem de Lançamentos
+        <Text
+          accessibilityRole="header"
+          className="min-w-0 flex-1 text-2xl font-bold text-app-text dark:text-app-text-dark"
+        >
+          Missões espaciais
         </Text>
         <View className="flex-row items-center">
           <Pressable
