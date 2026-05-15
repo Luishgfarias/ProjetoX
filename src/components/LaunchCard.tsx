@@ -1,5 +1,5 @@
-import React, { memo, useCallback, useMemo } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import React, { memo, useCallback, useMemo, useState } from "react";
+import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
 import type { LaunchCard as LaunchCardData } from "../@types/launch";
 import { formatLaunchDate } from "../utils/formatLaunchDate";
 import { getLaunchStatus } from "../utils/getLaunchStatus";
@@ -10,6 +10,7 @@ export type LaunchCardProps = {
 };
 
 function LaunchCardComponent({ launch, onPress }: LaunchCardProps) {
+  const [isImageLoading, setIsImageLoading] = useState(Boolean(launch.patchImage));
   const status = useMemo(() => getLaunchStatus(launch), [launch]);
   const formattedDate = useMemo(
     () => formatLaunchDate(launch.date_local),
@@ -31,11 +32,20 @@ function LaunchCardComponent({ launch, onPress }: LaunchCardProps) {
       className="mb-3 flex-row items-center rounded-lg border border-app-border bg-app-surface p-4 shadow-sm active:bg-app-surface-muted dark:border-app-border-dark dark:bg-app-surface-dark dark:active:bg-app-surface-muted-dark"
       onPress={handlePress}
     >
-      <Image
-        className="mr-4 h-16 w-16 rounded-md"
-        resizeMode="contain"
-        source={imageSource}
-      />
+      <View className="relative mr-4 h-16 w-16 items-center justify-center">
+        {isImageLoading && launch.patchImage && (
+          <View className="absolute inset-0 items-center justify-center">
+            <ActivityIndicator size="small" />
+          </View>
+        )}
+
+        <Image
+          className="h-16 w-16 rounded-md"
+          resizeMode="contain"
+          source={imageSource}
+          onLoadEnd={() => setIsImageLoading(false)}
+        />
+      </View>
 
       <View className="min-w-0 flex-1">
         <View className="mb-2 flex-row items-start justify-between">

@@ -137,7 +137,7 @@ describe("LaunchDetailsScreen", () => {
     expect(screen.getByText("Primeiro voo de demonstração.")).toBeTruthy();
   });
 
-  it("exibe tripulação no formato da API v5", () => {
+  it("exibe tripulação em sessão própria", () => {
     mockUseLaunchDetailsResult = {
       ...mockUseLaunchDetailsResult,
       launch: createLaunch({
@@ -156,11 +156,13 @@ describe("LaunchDetailsScreen", () => {
 
     renderScreen();
 
-    expect(
-      screen.getByText(
-        "62dd7196202306255024d13c (Commander), 62dd71c9202306255024d13d (Pilot)",
-      ),
-    ).toBeTruthy();
+    expect(screen.getByText("Tripulação")).toBeTruthy();
+    expect(screen.getByText("Membro 1")).toBeTruthy();
+    expect(screen.getByText("ID: 62dd7196202306255024d13c")).toBeTruthy();
+    expect(screen.getByText("Função: Commander")).toBeTruthy();
+    expect(screen.getByText("Membro 2")).toBeTruthy();
+    expect(screen.getByText("ID: 62dd71c9202306255024d13d")).toBeTruthy();
+    expect(screen.getByText("Função: Pilot")).toBeTruthy();
   });
 
   it("mostra status atrasado quando a API marcar upcoming em uma data que já passou", () => {
@@ -184,7 +186,7 @@ describe("LaunchDetailsScreen", () => {
     jest.useRealTimers();
   });
 
-  it("trata ausência de detalhes", () => {
+  it("oculta a sessão de descrição quando detalhes for null", () => {
     mockUseLaunchDetailsResult = {
       ...mockUseLaunchDetailsResult,
       launch: createLaunch({
@@ -194,7 +196,7 @@ describe("LaunchDetailsScreen", () => {
 
     renderScreen();
 
-    expect(screen.getByText("Sem detalhes disponíveis.")).toBeTruthy();
+    expect(screen.queryByText("Descrição")).toBeNull();
   });
 
   it("aplica fallback visual quando patch small e large forem null", () => {
@@ -228,8 +230,10 @@ describe("LaunchDetailsScreen", () => {
   it("exibe datas formatadas de forma amigavel", () => {
     renderScreen();
 
-    expect(screen.getByText("25/03/2006 às 10:30")).toBeTruthy();
-    expect(screen.getByText("24/03/2006 às 22:30 UTC")).toBeTruthy();
+    expect(screen.getAllByText("25/03/2006 às 10:30").length).toBeGreaterThan(0);
+    expect(
+      screen.getAllByText("24/03/2006 às 22:30 UTC").length,
+    ).toBeGreaterThan(0);
   });
 
   it("mostra botão de artigo quando houver link", () => {
@@ -280,14 +284,34 @@ describe("LaunchDetailsScreen", () => {
     ).toBeTruthy();
   });
 
-  it("não quebra quando webcast for null", () => {
+  it("oculta a sessão de links quando não houver nenhum link disponível", () => {
     renderScreen();
 
     expect(screen.queryByText(/video:/)).toBeNull();
-    expect(screen.getByText("Links úteis")).toBeTruthy();
+    expect(screen.queryByText("Links úteis")).toBeNull();
   });
 
-  it("lida com fairings nulo e arrays vazios ou nulos", () => {
+  it("mostra apenas links disponíveis", () => {
+    mockUseLaunchDetailsResult = {
+      ...mockUseLaunchDetailsResult,
+      launch: createLaunch({
+        links: {
+          ...createLaunch().links,
+          wikipedia: "https://example.com/wiki",
+          presskit: "https://example.com/presskit",
+        },
+      }),
+    };
+
+    renderScreen();
+
+    expect(screen.getByText("Wikipedia")).toBeTruthy();
+    expect(screen.getByText("Presskit")).toBeTruthy();
+    expect(screen.queryByText("Reddit campanha")).toBeNull();
+    expect(screen.queryByText("Transmissão")).toBeNull();
+  });
+
+  it("oculta seções totalmente vazias ou nulas", () => {
     mockUseLaunchDetailsResult = {
       ...mockUseLaunchDetailsResult,
       launch: createLaunch({
@@ -299,8 +323,14 @@ describe("LaunchDetailsScreen", () => {
 
     renderScreen();
 
-    expect(screen.getByText("Nenhum core informado")).toBeTruthy();
-    expect(screen.getByText("Nenhuma falha registrada")).toBeTruthy();
-    expect(screen.getByText("Coifa")).toBeTruthy();
+    expect(screen.queryByText("Cores")).toBeNull();
+    expect(screen.queryByText("Falhas")).toBeNull();
+    expect(screen.queryByText("Coifa")).toBeNull();
+  });
+
+  it("oculta a sessão de tripulação quando não houver membros", () => {
+    renderScreen();
+
+    expect(screen.queryByText("Tripulação")).toBeNull();
   });
 });
