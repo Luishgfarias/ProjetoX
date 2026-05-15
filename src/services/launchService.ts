@@ -11,6 +11,7 @@ type LaunchListItemResponse = Pick<
   | "flight_number"
   | "date_utc"
   | "date_local"
+  | "date_precision"
   | "upcoming"
   | "success"
 > & {
@@ -90,6 +91,7 @@ export async function getPaginatedLaunches(
           "flight_number",
           "date_utc",
           "date_local",
+          "date_precision",
           "upcoming",
           "success",
           "links.patch.small",

@@ -1,8 +1,8 @@
 import React, { memo, useCallback, useMemo } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import type { LaunchCard as LaunchCardData } from "../@types/launch";
-import { getLaunchStatus } from "../constants/launchStatus";
 import { formatLaunchDate } from "../utils/formatLaunchDate";
+import { getLaunchStatus } from "../utils/getLaunchStatus";
 
 export type LaunchCardProps = {
   launch: LaunchCardData;

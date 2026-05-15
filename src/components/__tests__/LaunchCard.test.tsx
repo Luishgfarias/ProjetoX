@@ -13,6 +13,7 @@ function createLaunch(overrides: Partial<LaunchData> = {}): LaunchData {
     flight_number: 1,
     date_utc: "2006-03-24T22:30:00.000Z",
     date_local: "2006-03-25T10:30:00-04:00",
+    date_precision: "hour",
     upcoming: false,
     success: true,
     patchImage: null,
@@ -21,6 +22,15 @@ function createLaunch(overrides: Partial<LaunchData> = {}): LaunchData {
 }
 
 describe("LaunchCard", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-05-15T12:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
   it("renderiza o nome da missao", () => {
     render(<LaunchCard launch={createLaunch()} onPress={jest.fn()} />);
 
@@ -41,8 +51,21 @@ describe("LaunchCard", () => {
 
   it.each([
     {
-      launch: createLaunch({ upcoming: true, success: null }),
+      launch: createLaunch({
+        upcoming: true,
+        success: null,
+        date_utc: "2099-03-24T22:30:00.000Z",
+      }),
       expectedStatus: "Agendado",
+    },
+    {
+      launch: createLaunch({
+        upcoming: true,
+        success: null,
+        date_utc: "2022-12-01T00:00:00.000Z",
+        date_precision: "month",
+      }),
+      expectedStatus: "Atrasado",
     },
     {
       launch: createLaunch({ upcoming: false, success: true }),

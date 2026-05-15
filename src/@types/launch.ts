@@ -108,6 +108,7 @@ export type LaunchCard = Pick<
   | "flight_number"
   | "date_utc"
   | "date_local"
+  | "date_precision"
   | "upcoming"
   | "success"
 > & {

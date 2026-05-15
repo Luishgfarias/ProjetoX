@@ -52,6 +52,7 @@ function createLaunchCard(
     flight_number: 1,
     date_utc: "2006-03-24T22:30:00.000Z",
     date_local: "2006-03-25T10:30:00-04:00",
+    date_precision: "hour",
     upcoming: false,
     success: false,
     patchImage: "https://images.example.com/falconsat.png",

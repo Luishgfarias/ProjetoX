@@ -131,6 +131,27 @@ describe("LaunchDetailsScreen", () => {
     expect(screen.getByText("Primeiro voo de demonstração.")).toBeTruthy();
   });
 
+  it("mostra status atrasado quando a API marcar upcoming em uma data que já passou", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-05-15T12:00:00.000Z"));
+
+    mockUseLaunchDetailsResult = {
+      ...mockUseLaunchDetailsResult,
+      launch: createLaunch({
+        upcoming: true,
+        success: null,
+        date_utc: "2022-12-01T00:00:00.000Z",
+        date_precision: "month",
+      }),
+    };
+
+    renderScreen();
+
+    expect(screen.getAllByText("Atrasado").length).toBeGreaterThan(0);
+
+    jest.useRealTimers();
+  });
+
   it("trata ausência de detalhes", () => {
     mockUseLaunchDetailsResult = {
       ...mockUseLaunchDetailsResult,

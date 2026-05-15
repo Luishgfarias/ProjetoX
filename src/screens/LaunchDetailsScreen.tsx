@@ -17,9 +17,9 @@ import {
   LAUNCH_EMPTY_MESSAGES,
   LAUNCH_FALLBACK_TEXT,
 } from "../constants/launchMessages";
-import { getLaunchStatus } from "../constants/launchStatus";
 import { useLaunchDetails } from "../hooks/useLaunchDetails";
 import { formatLaunchDate } from "../utils/formatLaunchDate";
+import { getLaunchStatus } from "../utils/getLaunchStatus";
 
 type Props = NativeStackScreenProps<RootStackParamList, "LaunchDetails">;
 
