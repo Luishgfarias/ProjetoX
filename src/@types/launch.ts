@@ -30,7 +30,7 @@ export type Launch = {
   net: boolean;
   window: number | null;
   tbd: boolean;
-  crew: string[];
+  crew: LaunchCrew[];
   ships: string[];
   capsules: string[];
   fairings: LaunchFairings | null;
@@ -46,6 +46,11 @@ export type LaunchFairings = {
   recovery_attempt: boolean | null;
   recovered: boolean | null;
   ships: string[];
+};
+
+export type LaunchCrew = {
+  crew: string;
+  role: string | null;
 };
 
 export type LaunchLinks = {

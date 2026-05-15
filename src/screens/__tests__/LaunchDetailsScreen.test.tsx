@@ -14,12 +14,18 @@ type UseLaunchDetailsResult = {
 
 let mockUseLaunchDetailsResult: UseLaunchDetailsResult;
 
-type LaunchDetailsScreenProps = React.ComponentProps<typeof LaunchDetailsScreen>;
+type LaunchDetailsScreenProps = React.ComponentProps<
+  typeof LaunchDetailsScreen
+>;
 type LaunchDetailsNavigation = LaunchDetailsScreenProps["navigation"];
 type LaunchDetailsRoute = LaunchDetailsScreenProps["route"];
 
 jest.mock("../../components/LaunchVideoPlayer", () => ({
-  LaunchVideoPlayer: ({ videoUrl }: { videoUrl?: Launch["links"]["webcast"] }) => {
+  LaunchVideoPlayer: ({
+    videoUrl,
+  }: {
+    videoUrl?: Launch["links"]["webcast"];
+  }) => {
     const { Text } = require("react-native");
 
     return videoUrl ? <Text>video:{JSON.stringify(videoUrl)}</Text> : null;
@@ -129,6 +135,32 @@ describe("LaunchDetailsScreen", () => {
     expect(screen.getByText("Voo #1")).toBeTruthy();
     expect(screen.getAllByText("Sucesso").length).toBeGreaterThan(0);
     expect(screen.getByText("Primeiro voo de demonstração.")).toBeTruthy();
+  });
+
+  it("exibe tripulação no formato da API v5", () => {
+    mockUseLaunchDetailsResult = {
+      ...mockUseLaunchDetailsResult,
+      launch: createLaunch({
+        crew: [
+          {
+            crew: "62dd7196202306255024d13c",
+            role: "Commander",
+          },
+          {
+            crew: "62dd71c9202306255024d13d",
+            role: "Pilot",
+          },
+        ],
+      }),
+    };
+
+    renderScreen();
+
+    expect(
+      screen.getByText(
+        "62dd7196202306255024d13c (Commander), 62dd71c9202306255024d13d (Pilot)",
+      ),
+    ).toBeTruthy();
   });
 
   it("mostra status atrasado quando a API marcar upcoming em uma data que já passou", () => {

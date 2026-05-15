@@ -31,7 +31,12 @@ export const missaoEspecial: Launch = {
   net: false,
   window: null,
   tbd: false,
-  crew: ["Luis Farias"],
+  crew: [
+    {
+      crew: "Luis Farias",
+      role: "Desenvolvedor",
+    },
+  ],
   ships: [],
   capsules: [],
   fairings: {

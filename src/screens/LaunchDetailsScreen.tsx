@@ -17,6 +17,7 @@ import {
   LAUNCH_EMPTY_MESSAGES,
   LAUNCH_FALLBACK_TEXT,
 } from "../constants/launchMessages";
+import type { Launch } from "../@types/launch";
 import { useLaunchDetails } from "../hooks/useLaunchDetails";
 import { formatLaunchDate } from "../utils/formatLaunchDate";
 import { getLaunchStatus } from "../utils/getLaunchStatus";
@@ -36,6 +37,21 @@ function formatBoolean(value: boolean | null) {
 
 function formatList(values: string[] | null | undefined, emptyMessage: string) {
   return values?.length ? values.join(", ") : emptyMessage;
+}
+
+function formatCrew(
+  values: Launch["crew"] | null | undefined,
+  emptyMessage: string,
+) {
+  if (!values?.length) {
+    return emptyMessage;
+  }
+
+  return values
+    .map((member) =>
+      member.role ? `${member.crew} (${member.role})` : member.crew,
+    )
+    .join(", ");
 }
 
 function DetailRow({
@@ -186,7 +202,7 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
   const payloads = formatList(launch.payloads, LAUNCH_EMPTY_MESSAGES.payloads);
   const ships = formatList(launch.ships, LAUNCH_EMPTY_MESSAGES.ships);
   const capsules = formatList(launch.capsules, LAUNCH_EMPTY_MESSAGES.capsules);
-  const crew = formatList(launch.crew, LAUNCH_EMPTY_MESSAGES.crew);
+  const crew = formatCrew(launch.crew, LAUNCH_EMPTY_MESSAGES.crew);
   const cores = launch.cores ?? [];
   const failures = launch.failures ?? [];
   const status = getLaunchStatus(launch);
