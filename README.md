@@ -145,57 +145,72 @@ npm test -- --runInBand
 | `src/utils/` | Funcoes puras de formatacao, status, retry e mapeamento de dados |
 | `test/` | Mocks e apoio para ambiente de teste |
 
-## Arquitetura
+## Fluxo de dados da lista
 
-O app segue uma arquitetura simples por camadas:
+A lista de missoes segue um caminho simples: os dados saem da API da SpaceX, passam pelo servico de requisicao, podem ser guardados em cache, entram no estado do app e finalmente aparecem na tela.
 
 ```text
-Telas
-  usam hooks e componentes
-
-Hooks
-  coordenam estado, efeitos e eventos da interface
-
-Store
-  concentra dados da listagem, busca, paginacao, carregamento e erros
-
-Services
-  fazem chamadas HTTP para a API da SpaceX
-
-Storage
-  salva cache de paginas e preferencia de tema localmente
-
-Utils
-  formatam e adaptam dados para a interface
+SpaceX API
+  -> Axios Service
+  -> AsyncStorage Cache
+  -> Zustand Store
+  -> Screen
+  -> Components
 ```
 
-### Fluxo da listagem
+### Responsabilidade de cada camada
 
-1. A tela `LaunchListScreen` renderiza busca, lista, estados de carregamento e controle de tema.
-2. O hook `useSearchLaunches` conecta a interface com a store.
-3. A store `launchStore` gerencia pagina atual, busca, cache, carregamento, refresh e erro.
-4. O service `launchService` consulta a API da SpaceX usando `launches/query`.
-5. O retorno e convertido para o formato de card por `mapLaunchToCard`.
-6. As paginas sao salvas no AsyncStorage para reuso local.
+| Camada | O que faz |
+| --- | --- |
+| SpaceX API | Fornece os dados oficiais dos lancamentos |
+| Axios Service | Busca os dados na API e prepara a resposta para o app |
+| AsyncStorage Cache | Guarda paginas ja carregadas para reaproveitar depois |
+| Zustand Store | Controla lista, busca, pagina atual, carregamento, erro e refresh |
+| Screen | Decide o que mostrar em cada momento: lista, loading, erro ou vazio |
+| Components | Renderizam as partes visuais, como busca, cards e mensagens |
 
-### Fluxo de detalhes
+### Como a lista carrega
 
-1. A tela `LaunchDetailsScreen` recebe o `id` da missao pela navegacao.
-2. O hook `useLaunchDetails` busca os dados completos da missao.
-3. O service `getLaunchById` consulta `launches/:id`, exceto para a missao especial local.
-4. A tela renderiza imagem, status, datas, links, payloads, tripulacao, falhas e video quando disponivel.
+Quando a tela de missoes abre, o app pede a primeira pagina de lancamentos. Antes de chamar a API, ele verifica se ja existe uma versao salva no cache local. Se existir, essa lista aparece rapidamente na tela. Depois disso, o app tenta buscar os dados mais recentes na API da SpaceX e atualiza a lista.
+
+Esse comportamento deixa a tela mais rapida quando ja existem dados salvos, mas ainda permite que a lista seja atualizada com informacoes novas.
+
+### Cache
+
+O cache fica no `AsyncStorage`. Ele guarda cada pagina de lancamentos separadamente, considerando tambem o texto pesquisado.
+
+Exemplo: uma busca vazia na pagina 1 e uma busca por `falcon` na pagina 1 sao salvas como consultas diferentes. Assim, o app nao mistura resultados de buscas diferentes.
+
+O cache ajuda principalmente em tres momentos:
+
+- ao abrir a lista novamente;
+- ao repetir uma busca ja feita;
+- ao carregar uma pagina que ja tinha sido buscada antes.
+
+### Paginacao
+
+A lista nao carrega todos os lancamentos de uma vez. Ela usa paginacao para buscar uma parte por vez.
+
+Na primeira abertura, o app carrega a pagina 1. Quando o usuario chega ao fim da lista, o app verifica se existe uma proxima pagina. Se existir, busca mais missoes e adiciona ao final da lista atual.
+
+Isso evita uma tela pesada e melhora a experiencia, principalmente em celulares.
+
+### Refresh
+
+O refresh acontece quando o usuario puxa a lista para atualizar.
+
+Nesse caso, o app limpa o cache dos lancamentos, busca novamente a primeira pagina na API e substitui a lista atual pelos dados mais recentes. Esse fluxo tambem limpa detalhes antigos salvos em memoria, garantindo que a lista volte para um estado atualizado.
 
 ## Decisoes tecnicas
 
-- **Expo como base do projeto:** reduz a complexidade de setup nativo e permite rodar rapidamente com Expo Go.
-- **TypeScript:** garante contratos mais claros para dados vindos da API e para parametros de navegacao.
-- **React Navigation com Native Stack:** entrega navegacao nativa entre lista, detalhes e WebView de artigo.
-- **Zustand para estado global:** oferece uma store pequena e direta para listagem, paginacao, busca e cache de detalhes.
-- **Axios centralizado:** o cliente HTTP fica em `src/services/api.ts`, com `baseURL`, timeout e retry automatico.
-- **AsyncStorage para cache:** paginas de lancamentos e preferencia de tema ficam persistidas localmente.
-- **NativeWind + Tailwind CSS:** facilita estilos consistentes com suporte a dark mode por classes.
-- **Separacao por responsabilidade:** telas cuidam de renderizacao, hooks coordenam comportamento, services acessam API e utils mantem regras puras testaveis.
-- **Testes focados:** componentes, telas, services, store e utils possuem cobertura com Jest e Testing Library.
+- **Expo:** facilita rodar o app no celular com Expo Go e reduz a necessidade de configuracao nativa.
+- **TypeScript:** ajuda a manter os dados e a navegacao mais seguros durante o desenvolvimento.
+- **React Navigation:** organiza a passagem entre lista, detalhes da missao e tela de artigo.
+- **Zustand:** concentra os dados da lista em um lugar simples de consultar e atualizar.
+- **Axios:** centraliza as chamadas para a API da SpaceX.
+- **AsyncStorage:** guarda informacoes locais, como cache da lista e preferencia de tema.
+- **NativeWind:** permite criar a interface com classes de estilo e suporte a tema claro/escuro.
+- **Testes automatizados:** validam partes importantes do app, como telas, componentes, store, services e funcoes auxiliares.
 
 ## API utilizada
 
@@ -222,13 +237,9 @@ export const API_TIMEOUT_MS = 10000;
 
 ### Paginacao e busca
 
-A listagem usa `POST /launches/query` com:
+A listagem usa o endpoint `/launches/query` para buscar os lancamentos aos poucos. O app informa qual pagina deseja carregar, quantos itens devem vir por pagina e, quando existe uma busca, envia o texto digitado para filtrar as missoes pelo nome.
 
-- `page`: pagina atual;
-- `limit`: tamanho da pagina definido em `LAUNCH_LIST_PAGE_SIZE`;
-- `sort`: ordenacao por `date_utc` descendente;
-- `select`: campos minimos necessarios para renderizar os cards;
-- `query.name.$regex`: filtro case-insensitive quando existe texto de busca.
+Os resultados sao exibidos dos lancamentos mais recentes para os mais antigos.
 
 ## Scripts disponiveis
 
