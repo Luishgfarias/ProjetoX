@@ -7,6 +7,7 @@ import {
   RefreshControl,
   Pressable,
   ListRenderItem,
+  StyleSheet,
 } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -29,6 +30,31 @@ import {
 
 type Props = NativeStackScreenProps<RootStackParamList, "LaunchList">;
 
+type InlineListErrorProps = {
+  message: string;
+  onRetry: () => void;
+};
+
+function InlineListError({ message, onRetry }: InlineListErrorProps) {
+  return (
+    <View className="mb-3 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 dark:border-rose-900 dark:bg-rose-950/50">
+      <Text className="text-sm font-medium text-app-danger dark:text-app-danger-dark">
+        {message}
+      </Text>
+      <Pressable
+        accessibilityLabel="Tentar novamente"
+        accessibilityRole="button"
+        className="mt-3 self-start rounded-full bg-app-primary px-4 py-2 active:bg-app-primary-pressed dark:bg-app-primary-dark dark:active:bg-app-primary-pressed-dark"
+        onPress={onRetry}
+      >
+        <Text className="text-sm font-semibold text-white dark:text-gray-950">
+          Tentar novamente
+        </Text>
+      </Pressable>
+    </View>
+  );
+}
+
 export default function LaunchListScreen({ navigation }: Props) {
   const { colors, isDark, toggleThemePreference } = useAppTheme();
   const { isExitHintVisible } = useDoubleBackExit();
@@ -43,6 +69,7 @@ export default function LaunchListScreen({ navigation }: Props) {
     searchInput,
     refreshLaunches,
     retryLaunches,
+    retryListError,
     handleSearch,
     handleSubmitSearch,
     onViewableItemsChanged,
@@ -68,8 +95,11 @@ export default function LaunchListScreen({ navigation }: Props) {
   const renderFooter = useCallback(() => {
     if (isLoadingMore) {
       return (
-        <View className="py-4">
+        <View className="items-center px-6 py-5">
           <ActivityIndicator size="small" color={colors.loadingIndicator} />
+          <Text className="mt-2 text-center text-xs font-medium text-app-subtle dark:text-app-subtle-dark">
+            Carregando mais missões...
+          </Text>
         </View>
       );
     }
@@ -99,15 +129,24 @@ export default function LaunchListScreen({ navigation }: Props) {
     return <EmptyState search={search} />;
   }, [error, isLoading, retryLaunches, search]);
 
+  const hasVisibleListError = Boolean(error && launches.length > 0);
+  const listContentContainerStyle = useMemo(
+    () =>
+      launches.length === 0 ? styles.emptyListContent : styles.listContent,
+    [launches.length],
+  );
+
   const refreshControl = useMemo(
     () => (
       <RefreshControl
         refreshing={isRefreshing}
         onRefresh={refreshLaunches}
         tintColor={colors.loadingIndicator}
+        colors={[colors.loadingIndicator]}
+        progressBackgroundColor={colors.card}
       />
     ),
-    [colors.loadingIndicator, isRefreshing, refreshLaunches],
+    [colors.card, colors.loadingIndicator, isRefreshing, refreshLaunches],
   );
 
   return (
@@ -150,14 +189,20 @@ export default function LaunchListScreen({ navigation }: Props) {
         onChangeText={handleSearch}
         onSubmitSearch={handleSubmitSearch}
       />
+      {hasVisibleListError && error ? (
+        <InlineListError message={error} onRetry={retryListError} />
+      ) : null}
       <FlatList
         data={launches}
         keyExtractor={(item) => item.id}
         renderItem={renderItem}
+        contentContainerStyle={listContentContainerStyle}
         initialNumToRender={INITIAL_NUM_TO_RENDER}
         maxToRenderPerBatch={MAX_TO_RENDER_PER_BATCH}
         windowSize={WINDOW_SIZE}
         removeClippedSubviews
+        keyboardDismissMode="on-drag"
+        keyboardShouldPersistTaps="handled"
         ListEmptyComponent={renderEmpty}
         ListFooterComponent={renderFooter}
         onViewableItemsChanged={onViewableItemsChanged}
@@ -179,3 +224,14 @@ export default function LaunchListScreen({ navigation }: Props) {
     </SafeAreaView>
   );
 }
+
+const styles = StyleSheet.create({
+  emptyListContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+    paddingBottom: 24,
+  },
+  listContent: {
+    paddingBottom: 24,
+  },
+});

@@ -6,7 +6,12 @@ import {
   SEARCH_DEBOUNCE_DELAY_MS,
   VIEWABILITY_ITEM_VISIBLE_PERCENT_THRESHOLD,
 } from "../constants/launchList";
+import { LAUNCH_ERROR_MESSAGES } from "../constants/launchMessages";
 import { useLaunchStore } from "../store/launchStore";
+
+function normalizeSearch(value: string) {
+  return value.trim();
+}
 
 export function useSearchLaunches() {
   const launches = useLaunchStore((state) => state.launches);
@@ -21,6 +26,7 @@ export function useSearchLaunches() {
   );
   const refreshLaunches = useLaunchStore((state) => state.refreshLaunches);
   const retryLaunches = useLaunchStore((state) => state.retryLaunches);
+  const loadMoreLaunches = useLaunchStore((state) => state.loadMoreLaunches);
   const setSearch = useLaunchStore((state) => state.setSearch);
   const [searchInput, setSearchInput] = useState(search);
 
@@ -80,20 +86,53 @@ export function useSearchLaunches() {
 
   const handleSubmitSearch = useCallback(
     (text: string) => {
-      setSearchInput(text);
+      const normalizedText = normalizeSearch(text);
 
-      if (text !== search) {
-        void setSearch(text);
+      setSearchInput(normalizedText);
+
+      if (normalizedText !== search) {
+        void setSearch(normalizedText);
       }
     },
     [search, setSearch],
   );
 
+  const retryListError = useCallback(() => {
+    const {
+      error,
+      hasNextPage,
+      isLoading,
+      isLoadingMore,
+      isRefreshing,
+      launches,
+    } = useLaunchStore.getState();
+
+    if (!error || isLoading || isLoadingMore || isRefreshing) return;
+
+    if (
+      error === LAUNCH_ERROR_MESSAGES.loadMore &&
+      launches.length > 0 &&
+      hasNextPage
+    ) {
+      void loadMoreLaunches();
+      return;
+    }
+
+    if (error === LAUNCH_ERROR_MESSAGES.refresh && launches.length > 0) {
+      void refreshLaunches();
+      return;
+    }
+
+    void retryLaunches();
+  }, [loadMoreLaunches, refreshLaunches, retryLaunches]);
+
   useEffect(() => {
-    if (searchInput === search) return;
+    const normalizedSearchInput = normalizeSearch(searchInput);
+
+    if (normalizedSearchInput === search) return;
 
     const timeoutId = setTimeout(() => {
-      void setSearch(searchInput);
+      void setSearch(normalizedSearchInput);
     }, SEARCH_DEBOUNCE_DELAY_MS);
 
     return () => {
@@ -112,6 +151,7 @@ export function useSearchLaunches() {
     error,
     refreshLaunches,
     retryLaunches,
+    retryListError,
     handleSearch,
     handleSubmitSearch,
     onViewableItemsChanged,

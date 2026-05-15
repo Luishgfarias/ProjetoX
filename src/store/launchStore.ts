@@ -120,12 +120,10 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
         isLoading,
         isLoadingMore,
         isRefreshing,
-        error,
         launches,
         search,
       } = get();
       if (
-        error ||
         launches.length === 0 ||
         !hasNextPage ||
         isLoading ||
@@ -217,10 +215,11 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
 
     setSearch: async (value: string) => {
       const requestId = nextListRequestId();
+      const search = value.trim();
       let hasCachedLaunches = false;
 
       set({
-        search: value,
+        search,
         page: 1,
         launches: [],
         launchDetailsById: {},
@@ -232,13 +231,13 @@ export const useLaunchStore = create<LaunchStore>((set, get) => {
       });
 
       try {
-        const cachedResponse = await getLaunchPage(1, value);
+        const cachedResponse = await getLaunchPage(1, search);
         if (cachedResponse && isLatestListRequest(requestId)) {
           hasCachedLaunches = true;
           replaceLaunches(requestId, cachedResponse, "isLoading");
         }
 
-        const response = await fetchLaunchPage(1, value);
+        const response = await fetchLaunchPage(1, search);
         replaceLaunches(requestId, response, "isLoading");
       } catch {
         if (hasCachedLaunches) return;

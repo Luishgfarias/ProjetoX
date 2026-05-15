@@ -1,6 +1,7 @@
 import { act } from "@testing-library/react-native";
 import type { Launch, LaunchCard, LaunchList } from "../../@types/launch";
 import { LAUNCH_ERROR_MESSAGES } from "../../constants/launchMessages";
+import { createDeferred, simulateError } from "../../utils/hellperTests";
 import { useLaunchStore } from "../launchStore";
 
 jest.mock("../../services/launchService", () => ({
@@ -20,32 +21,12 @@ import {
   saveLaunchPage,
 } from "../../storage/launchStorage";
 
-type Deferred<T> = {
-  promise: Promise<T>;
-  resolve: (value: T) => void;
-  reject: (error?: unknown) => void;
-};
-
 const mockedGetPaginatedLaunches = jest.mocked(getPaginatedLaunches);
 const mockedClearLaunchCache = jest.mocked(clearLaunchCache);
 const mockedGetLaunchPage = jest.mocked(getLaunchPage);
 const mockedSaveLaunchPage = jest.mocked(saveLaunchPage);
 
-function createDeferred<T>(): Deferred<T> {
-  let resolve!: (value: T) => void;
-  let reject!: (error?: unknown) => void;
-
-  const promise = new Promise<T>((promiseResolve, promiseReject) => {
-    resolve = promiseResolve;
-    reject = promiseReject;
-  });
-
-  return { promise, resolve, reject };
-}
-
-function createLaunchCard(
-  overrides: Partial<LaunchCard> = {},
-): LaunchCard {
+function createLaunchCard(overrides: Partial<LaunchCard> = {}): LaunchCard {
   return {
     id: "launch-1",
     name: "FalconSat",
@@ -192,7 +173,10 @@ describe("launchStore", () => {
 
   it("carrega a primeira pagina com sucesso", async () => {
     const response = createLaunchList(
-      [createLaunchCard(), createLaunchCard({ id: "launch-2", name: "Crew-1" })],
+      [
+        createLaunchCard(),
+        createLaunchCard({ id: "launch-2", name: "Crew-1" }),
+      ],
       { hasNextPage: true, totalDocs: 2, totalPages: 2 },
     );
     mockedGetPaginatedLaunches.mockResolvedValueOnce(response);
@@ -214,7 +198,9 @@ describe("launchStore", () => {
   });
 
   it("guarda erro ao falhar no carregamento inicial", async () => {
-    mockedGetPaginatedLaunches.mockRejectedValueOnce(new Error("Falha"));
+    mockedGetPaginatedLaunches.mockImplementationOnce(async () =>
+      simulateError("Falha"),
+    );
 
     await act(async () => {
       await useLaunchStore.getState().loadInitialLaunches();
@@ -230,7 +216,13 @@ describe("launchStore", () => {
   it("permite retry reaproveitando a pagina atual", async () => {
     const response = createLaunchList(
       [createLaunchCard({ id: "launch-3", name: "Transporter-1" })],
-      { page: 2, hasPrevPage: true, prevPage: 1, totalPages: 3, hasNextPage: true },
+      {
+        page: 2,
+        hasPrevPage: true,
+        prevPage: 1,
+        totalPages: 3,
+        hasNextPage: true,
+      },
     );
     const deferred = createDeferred<LaunchList<LaunchCard>>();
     mockedGetPaginatedLaunches.mockReturnValueOnce(deferred.promise);
@@ -301,6 +293,39 @@ describe("launchStore", () => {
       await promise;
     });
 
+    expect(useLaunchStore.getState()).toMatchObject({
+      launches: [currentLaunch, nextLaunch],
+      page: 2,
+      hasNextPage: false,
+      isLoadingMore: false,
+      error: null,
+    });
+  });
+
+  it("permite tentar carregar mais novamente apos erro de paginacao", async () => {
+    const currentLaunch = createLaunchCard();
+    const nextLaunch = createLaunchCard({ id: "launch-2", name: "Starlink" });
+    const response = createLaunchList([nextLaunch], {
+      page: 2,
+      hasPrevPage: true,
+      hasNextPage: false,
+      prevPage: 1,
+      totalPages: 2,
+    });
+    mockedGetPaginatedLaunches.mockResolvedValueOnce(response);
+
+    useLaunchStore.setState({
+      launches: [currentLaunch],
+      page: 1,
+      hasNextPage: true,
+      error: LAUNCH_ERROR_MESSAGES.loadMore,
+    });
+
+    await act(async () => {
+      await useLaunchStore.getState().loadMoreLaunches();
+    });
+
+    expect(mockedGetPaginatedLaunches).toHaveBeenCalledWith(2, "");
     expect(useLaunchStore.getState()).toMatchObject({
       launches: [currentLaunch, nextLaunch],
       page: 2,
@@ -414,6 +439,23 @@ describe("launchStore", () => {
       hasNextPage: false,
       isLoading: false,
       error: null,
+    });
+  });
+
+  it("normaliza espacos da busca antes de consultar e salvar estado", async () => {
+    const response = createLaunchList([createLaunchCard({ name: "Starlink" })]);
+    mockedGetPaginatedLaunches.mockResolvedValueOnce(response);
+
+    await act(async () => {
+      await useLaunchStore.getState().setSearch("  Starlink  ");
+    });
+
+    expect(mockedGetLaunchPage).toHaveBeenCalledWith(1, "Starlink");
+    expect(mockedGetPaginatedLaunches).toHaveBeenCalledWith(1, "Starlink");
+    expect(mockedSaveLaunchPage).toHaveBeenCalledWith(1, "Starlink", response);
+    expect(useLaunchStore.getState()).toMatchObject({
+      search: "Starlink",
+      launches: response.docs,
     });
   });
 });

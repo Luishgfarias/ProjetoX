@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  act,
-  fireEvent,
-  render,
-  screen,
-} from "@testing-library/react-native";
+import { act, fireEvent, render, screen } from "@testing-library/react-native";
 import { FlatList, Text } from "react-native";
 import type { LaunchCard } from "../../@types/launch";
 import { SEARCH_DEBOUNCE_DELAY_MS } from "../../constants/launchList";
@@ -171,6 +166,27 @@ describe("LaunchListScreen", () => {
     expect(retryLaunches).toHaveBeenCalledTimes(1);
   });
 
+  it("mantem a lista visivel e exibe retry inline quando ha erro apos carregar itens", () => {
+    const retryLoadMore = jest.fn();
+    mockStoreState = createStoreState({
+      launches: [createLaunch()],
+      hasNextPage: true,
+      error: "Falha ao carregar mais lançamentos.",
+      loadMoreLaunches: retryLoadMore,
+    });
+
+    renderScreen();
+
+    expect(screen.getByText("FalconSat")).toBeTruthy();
+    expect(
+      screen.getByText("Falha ao carregar mais lançamentos."),
+    ).toBeTruthy();
+
+    fireEvent.press(screen.getByLabelText("Tentar novamente"));
+
+    expect(retryLoadMore).toHaveBeenCalledTimes(1);
+  });
+
   it("exibe estado vazio", () => {
     renderScreen();
 
@@ -243,5 +259,16 @@ describe("LaunchListScreen", () => {
     });
 
     expect(refreshLaunches).toHaveBeenCalledTimes(1);
+  });
+
+  it("exibe loading no fim da lista", () => {
+    mockStoreState = createStoreState({
+      launches: [createLaunch()],
+      isLoadingMore: true,
+    });
+
+    renderScreen();
+
+    expect(screen.getByText("Carregando mais missões...")).toBeTruthy();
   });
 });
