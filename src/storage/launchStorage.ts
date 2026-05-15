@@ -1,36 +1,44 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { LaunchList } from "../@types/launch";
+import type { LaunchCard, LaunchList } from "../@types/launch";
 import { LAUNCH_CACHE_KEY_PREFIX } from "../constants/storage";
 
-function getCacheKey(page: number): string {
-  return `${LAUNCH_CACHE_KEY_PREFIX}${page}`;
+type CachedLaunchList = LaunchList<LaunchCard>;
+
+function normalizeSearch(search?: string): string {
+  return search?.trim().toLowerCase() || "all";
+}
+
+function getCacheKey(page: number, search?: string): string {
+  const encodedSearch = encodeURIComponent(normalizeSearch(search));
+  return `${LAUNCH_CACHE_KEY_PREFIX}${encodedSearch}_${page}`;
 }
 
 export async function saveLaunchPage(
   page: number,
-  data: LaunchList,
+  search: string | undefined,
+  data: CachedLaunchList,
 ): Promise<void> {
   try {
-    const key = getCacheKey(page);
-    const serializedData = JSON.stringify(data);
-    await AsyncStorage.setItem(key, serializedData);
+    const key = getCacheKey(page, search);
+    await AsyncStorage.setItem(key, JSON.stringify(data));
   } catch (error) {
     console.error(`Error saving page ${page} to storage:`, error);
-    throw new Error(`Failed to save page ${page} to local cache`);
   }
 }
 
-export async function getLaunchPage(page: number): Promise<LaunchList | null> {
+export async function getLaunchPage(
+  page: number,
+  search?: string,
+): Promise<CachedLaunchList | null> {
   try {
-    const key = getCacheKey(page);
+    const key = getCacheKey(page, search);
     const cachedData = await AsyncStorage.getItem(key);
 
     if (cachedData === null) {
       return null;
     }
 
-    const parsedData = JSON.parse(cachedData) as LaunchList;
-    return parsedData;
+    return JSON.parse(cachedData) as CachedLaunchList;
   } catch (error) {
     console.error(`Error reading page ${page} from storage:`, error);
     return null;
@@ -48,7 +56,6 @@ export async function clearLaunchCache(): Promise<void> {
       await Promise.all(cacheKeys.map((key) => AsyncStorage.removeItem(key)));
     }
   } catch (error) {
-    // O cache é opcional. Se o AsyncStorage não estiver disponível, o refresh
-    // ainda deve buscar a página 1 na API e resetar a paginação normalmente.
+    console.error("Error clearing launch cache:", error);
   }
 }
