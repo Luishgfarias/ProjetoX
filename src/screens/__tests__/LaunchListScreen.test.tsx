@@ -28,6 +28,10 @@ type MockStoreState = {
 
 let mockStoreState: MockStoreState;
 
+type LaunchListScreenProps = React.ComponentProps<typeof LaunchListScreen>;
+type LaunchListNavigation = LaunchListScreenProps["navigation"];
+type LaunchListRoute = LaunchListScreenProps["route"];
+
 jest.mock("@expo/vector-icons/MaterialIcons", () => {
   const { Text } = require("react-native");
 
@@ -114,9 +118,14 @@ function createStoreState(
 function renderScreen() {
   const navigation = {
     navigate: jest.fn(),
+  } as Partial<LaunchListNavigation> as LaunchListNavigation;
+
+  const route: LaunchListRoute = {
+    key: "LaunchList-test-route",
+    name: "LaunchList",
   };
 
-  render(<LaunchListScreen navigation={navigation as never} />);
+  render(<LaunchListScreen navigation={navigation} route={route} />);
 
   return { navigation };
 }

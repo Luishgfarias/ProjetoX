@@ -13,6 +13,10 @@ type UseLaunchDetailsResult = {
 
 let mockUseLaunchDetailsResult: UseLaunchDetailsResult;
 
+type LaunchDetailsScreenProps = React.ComponentProps<typeof LaunchDetailsScreen>;
+type LaunchDetailsNavigation = LaunchDetailsScreenProps["navigation"];
+type LaunchDetailsRoute = LaunchDetailsScreenProps["route"];
+
 jest.mock("../../components/LaunchVideoPlayer", () => ({
   LaunchVideoPlayer: ({ videoUrl }: { videoUrl?: Launch["links"]["webcast"] }) => {
     const { Text } = require("react-native");
@@ -87,19 +91,17 @@ function renderScreen() {
   const navigation = {
     goBack: jest.fn(),
     navigate: jest.fn(),
-  };
-  const route = {
+  } as Partial<LaunchDetailsNavigation> as LaunchDetailsNavigation;
+
+  const route: LaunchDetailsRoute = {
+    key: "LaunchDetails-test-route",
+    name: "LaunchDetails",
     params: {
       id: "launch-1",
     },
   };
 
-  render(
-    <LaunchDetailsScreen
-      navigation={navigation as never}
-      route={route as never}
-    />,
-  );
+  render(<LaunchDetailsScreen navigation={navigation} route={route} />);
 
   return { navigation };
 }

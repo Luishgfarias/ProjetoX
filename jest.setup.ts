@@ -3,7 +3,7 @@ import { jest } from "@jest/globals";
 global.requestAnimationFrame =
   global.requestAnimationFrame ??
   ((callback: FrameRequestCallback): number =>
-    setTimeout(() => callback(Date.now()), 0) as unknown as number);
+    Number(setTimeout(() => callback(Date.now()), 0)));
 
 jest.mock("@react-native-async-storage/async-storage", () =>
   require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
