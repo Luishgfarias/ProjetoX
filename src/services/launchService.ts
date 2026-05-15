@@ -17,7 +17,7 @@ type LaunchListItemResponse = Pick<
   links: {
     patch: {
       small: string | null;
-    };
+    } | null;
   };
 };
 

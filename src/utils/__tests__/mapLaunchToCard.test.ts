@@ -1,10 +1,11 @@
 import { mapLaunchToCard } from "../mapLaunchToCard";
 
 type MapLaunchInput = Parameters<typeof mapLaunchToCard>[0];
+type MapLaunchPatch = NonNullable<MapLaunchInput["links"]["patch"]>;
 
 function createLaunch(
   overrides: Partial<MapLaunchInput> = {},
-  patchOverrides: Partial<MapLaunchInput["links"]["patch"]> = {},
+  patchOverrides: Partial<MapLaunchPatch> = {},
 ): MapLaunchInput {
   return {
     id: "launch-1",
@@ -61,6 +62,18 @@ describe("mapLaunchToCard", () => {
     expect(result.patchImage).toBeNull();
   });
 
+  it("retorna patchImage null quando patch vier nulo", () => {
+    const launch = createLaunch({
+      links: {
+        patch: null,
+      },
+    });
+
+    const result = mapLaunchToCard(launch);
+
+    expect(result.patchImage).toBeNull();
+  });
+
   it("nao altera os dados originais", () => {
     const launch = createLaunch();
     const originalLaunch = structuredClone(launch);
@@ -69,6 +82,6 @@ describe("mapLaunchToCard", () => {
 
     expect(launch).toEqual(originalLaunch);
     expect(result).not.toBe(launch);
-    expect(result.patchImage).toBe(launch.links.patch.small);
+    expect(result.patchImage).toBe(launch.links.patch?.small ?? null);
   });
 });

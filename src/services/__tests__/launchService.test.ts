@@ -29,10 +29,11 @@ type LaunchListItemResponse = Parameters<typeof mapLaunchToCard>[0];
 type PaginatedLaunchApiResponse = Omit<LaunchList<LaunchCard>, "docs"> & {
   docs: LaunchListItemResponse[];
 };
+type LaunchListItemPatch = NonNullable<LaunchListItemResponse["links"]["patch"]>;
 
 function createLaunchListItem(
   overrides: Partial<LaunchListItemResponse> = {},
-  patchOverrides: Partial<LaunchListItemResponse["links"]["patch"]> = {},
+  patchOverrides: Partial<LaunchListItemPatch> = {},
 ): LaunchListItemResponse {
   return {
     id: "launch-1",
@@ -160,5 +161,21 @@ describe("launchService", () => {
     mockPost.mockRejectedValueOnce(apiError);
 
     await expect(getPaginatedLaunches(1)).rejects.toThrow("Falha na API");
+  });
+
+  it("mapeia patchImage como null quando patch vier nulo", async () => {
+    mockPost.mockResolvedValueOnce({
+      data: createPaginatedResponse([
+        createLaunchListItem({
+          links: {
+            patch: null,
+          },
+        }),
+      ]),
+    });
+
+    const result: LaunchList<LaunchCard> = await getPaginatedLaunches(1);
+
+    expect(result.docs[0]?.patchImage).toBeNull();
   });
 });

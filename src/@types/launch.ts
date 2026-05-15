@@ -33,10 +33,10 @@ export type Launch = {
   crew: string[];
   ships: string[];
   capsules: string[];
-  fairings: LaunchFairings;
+  fairings: LaunchFairings | null;
   links: LaunchLinks;
-  failures: LaunchFailure[];
-  cores: LaunchCore[];
+  failures: LaunchFailure[] | null;
+  cores: LaunchCore[] | null;
   auto_update: boolean;
   launch_library_id: string | null;
 };
@@ -49,7 +49,7 @@ export type LaunchFairings = {
 };
 
 export type LaunchLinks = {
-  patch: LaunchPatchLinks;
+  patch: LaunchPatchLinks | null;
   reddit: LaunchRedditLinks;
   flickr: LaunchFlickrLinks;
   presskit: string | null;

@@ -1,5 +1,6 @@
 import React from "react";
 import { fireEvent, render, screen } from "@testing-library/react-native";
+import { Image } from "react-native";
 import type { Launch } from "../../@types/launch";
 import LaunchDetailsScreen from "../LaunchDetailsScreen";
 
@@ -143,6 +144,34 @@ describe("LaunchDetailsScreen", () => {
     expect(screen.getByText("Sem detalhes disponíveis.")).toBeTruthy();
   });
 
+  it("aplica fallback visual quando patch small e large forem null", () => {
+    mockUseLaunchDetailsResult = {
+      ...mockUseLaunchDetailsResult,
+      launch: createLaunch({
+        links: {
+          ...createLaunch().links,
+          patch: {
+            small: null,
+            large: null,
+          },
+        },
+      }),
+    };
+
+    renderScreen();
+
+    expect(screen.UNSAFE_getByType(Image).props.source).toMatchObject({
+      testUri: expect.stringContaining("noMissionImage.png"),
+    });
+  });
+
+  it("mostra fallback para data de queima estática quando vier nula", () => {
+    renderScreen();
+
+    expect(screen.getByText("Queima estática (UTC)")).toBeTruthy();
+    expect(screen.getAllByText("Não informado").length).toBeGreaterThan(0);
+  });
+
   it("mostra botão de artigo quando houver link", () => {
     mockUseLaunchDetailsResult = {
       ...mockUseLaunchDetailsResult,
@@ -196,5 +225,22 @@ describe("LaunchDetailsScreen", () => {
 
     expect(screen.queryByText(/video:/)).toBeNull();
     expect(screen.getByText("Links úteis")).toBeTruthy();
+  });
+
+  it("lida com fairings nulo e arrays vazios ou nulos", () => {
+    mockUseLaunchDetailsResult = {
+      ...mockUseLaunchDetailsResult,
+      launch: createLaunch({
+        fairings: null,
+        failures: null,
+        cores: null,
+      }),
+    };
+
+    renderScreen();
+
+    expect(screen.getByText("Nenhum core informado")).toBeTruthy();
+    expect(screen.getByText("Nenhuma falha registrada")).toBeTruthy();
+    expect(screen.getByText("Coifa")).toBeTruthy();
   });
 });

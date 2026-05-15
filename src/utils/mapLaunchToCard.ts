@@ -14,7 +14,7 @@ export function mapLaunchToCard(
     links: {
       patch: {
         small: string | null;
-      };
+      } | null;
     };
   },
 ): LaunchCard {
@@ -26,6 +26,6 @@ export function mapLaunchToCard(
     date_local: launch.date_local,
     upcoming: launch.upcoming,
     success: launch.success,
-    patchImage: launch.links.patch.small,
+    patchImage: launch.links.patch?.small ?? null,
   };
 }

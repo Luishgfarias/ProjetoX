@@ -227,6 +227,10 @@ export default function LaunchDetailsScreen({ route, navigation }: Props) {
         <DetailRow label="Número do voo" value={`#${launch.flight_number}`} />
         <DetailRow label="Data local" value={formatDate(launch.date_local)} />
         <DetailRow label="Data UTC" value={formatDate(launch.date_utc)} />
+        <DetailRow
+          label="Queima estática (UTC)"
+          value={formatDate(launch.static_fire_date_utc)}
+        />
         <DetailRow label="Status" value={status.label} />
         <DetailRow
           label="Rocket ID"

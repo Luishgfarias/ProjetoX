@@ -77,4 +77,12 @@ describe("LaunchCard", () => {
       uri: patchImage,
     });
   });
+
+  it("aplica fallback visual quando patchImage for null", () => {
+    render(<LaunchCard launch={createLaunch()} onPress={jest.fn()} />);
+
+    expect(screen.UNSAFE_getByType(Image).props.source).toMatchObject({
+      testUri: expect.stringContaining("noMissionImage.png"),
+    });
+  });
 });
