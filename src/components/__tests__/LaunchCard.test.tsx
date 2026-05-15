@@ -33,6 +33,12 @@ describe("LaunchCard", () => {
     expect(screen.getByText("Voo #1")).toBeTruthy();
   });
 
+  it("renderiza a data formatada de forma amigavel", () => {
+    render(<LaunchCard launch={createLaunch()} onPress={jest.fn()} />);
+
+    expect(screen.getByText("Data: 25/03/2006 às 10:30")).toBeTruthy();
+  });
+
   it.each([
     {
       launch: createLaunch({ upcoming: true, success: null }),

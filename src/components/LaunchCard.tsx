@@ -2,6 +2,7 @@ import React, { memo, useCallback, useMemo } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import type { LaunchCard as LaunchCardData } from "../@types/launch";
 import { getLaunchStatus } from "../constants/launchStatus";
+import { formatLaunchDate } from "../utils/formatLaunchDate";
 
 export type LaunchCardProps = {
   launch: LaunchCardData;
@@ -11,7 +12,7 @@ export type LaunchCardProps = {
 function LaunchCardComponent({ launch, onPress }: LaunchCardProps) {
   const status = useMemo(() => getLaunchStatus(launch), [launch]);
   const formattedDate = useMemo(
-    () => new Date(launch.date_local).toLocaleDateString(),
+    () => formatLaunchDate(launch.date_local),
     [launch.date_local],
   );
   const imageSource = useMemo(

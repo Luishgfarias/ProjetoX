@@ -172,6 +172,13 @@ describe("LaunchDetailsScreen", () => {
     expect(screen.getAllByText("Não informado").length).toBeGreaterThan(0);
   });
 
+  it("exibe datas formatadas de forma amigavel", () => {
+    renderScreen();
+
+    expect(screen.getByText("25/03/2006 às 10:30")).toBeTruthy();
+    expect(screen.getByText("24/03/2006 às 22:30 UTC")).toBeTruthy();
+  });
+
   it("mostra botão de artigo quando houver link", () => {
     mockUseLaunchDetailsResult = {
       ...mockUseLaunchDetailsResult,

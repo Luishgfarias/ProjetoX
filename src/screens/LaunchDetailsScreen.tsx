@@ -19,12 +19,13 @@ import {
 } from "../constants/launchMessages";
 import { getLaunchStatus } from "../constants/launchStatus";
 import { useLaunchDetails } from "../hooks/useLaunchDetails";
+import { formatLaunchDate } from "../utils/formatLaunchDate";
 
 type Props = NativeStackScreenProps<RootStackParamList, "LaunchDetails">;
 
 function formatDate(value: string | null) {
   if (!value) return LAUNCH_FALLBACK_TEXT.unknown;
-  return new Date(value).toLocaleString();
+  return formatLaunchDate(value);
 }
 
 function formatBoolean(value: boolean | null) {
