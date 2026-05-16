@@ -119,7 +119,7 @@ npm test -- --runInBand
 |   |-- store/
 |   |-- theme/
 |   `-- utils/
-|-- test/
+|-- mocks/
 |-- global.css
 |-- jest.config.js
 |-- metro.config.js
@@ -143,7 +143,7 @@ npm test -- --runInBand
 | `src/store/` | Estado global da listagem e detalhes de missoes |
 | `src/theme/` | Provider de tema claro/escuro integrado ao NativeWind e React Navigation |
 | `src/utils/` | Funcoes puras de formatacao, status, retry e mapeamento de dados |
-| `test/` | Mocks e apoio para ambiente de teste |
+| `mocks/` | Mocks e apoio para ambiente de teste |
 
 ## Fluxo de dados da lista
 
@@ -203,14 +203,21 @@ Nesse caso, o app limpa o cache dos lancamentos, busca novamente a primeira pagi
 
 ## Decisoes tecnicas
 
-- **Expo:** facilita rodar o app no celular com Expo Go e reduz a necessidade de configuracao nativa.
-- **TypeScript:** ajuda a manter os dados e a navegacao mais seguros durante o desenvolvimento.
-- **React Navigation:** organiza a passagem entre lista, detalhes da missao e tela de artigo.
-- **Zustand:** concentra os dados da lista em um lugar simples de consultar e atualizar.
-- **Axios:** centraliza as chamadas para a API da SpaceX.
-- **AsyncStorage:** guarda informacoes locais, como cache da lista e preferencia de tema.
-- **NativeWind:** permite criar a interface com classes de estilo e suporte a tema claro/escuro.
-- **Testes automatizados:** validam partes importantes do app, como telas, componentes, store, services e funcoes auxiliares.
+Boa parte das decisoes tecnicas deste app partiram de escolhas humanas minhas, com apoio de IA na execucao para agilizar o desenvolvimento. A organizacao geral do projeto tambem foi pensada por mim e, ao longo do processo, recebeu ajustes e refinamentos com ajuda da IA.
+
+Entre as principais decisoes de base do projeto, optei por usar **Zustand** como store para centralizar os dados de forma simples e direta, principalmente pela minha familiaridade com a biblioteca e pela forma enxuta como ela atende ao que o app precisa. Para as requisicoes a **API da SpaceX**, escolhi o **Axios**, tambem por familiaridade e por ele se encaixar bem no fluxo de consumo da API. Na parte de interface, o **NativeWind** foi uma escolha pessoal para facilitar a estilizacao com classes e manter o suporte aos temas claro e escuro.
+
+Pensando no consumo de dados, decidi usar a API de forma paginada na listagem e buscar apenas os campos necessarios em cada consulta. Essa escolha ajuda a deixar as requisicoes mais leves, agiliza o processamento e contribui para um uso mais eficiente de memoria. Tambem optei por utilizar cache local, para reaproveitar dados ja carregados anteriormente e melhorar a experiencia de uso em novas consultas.
+
+Na estrutura do projeto, a organizacao e a separacao das pastas tambem foram definidas por mim, buscando manter uma base que fizesse sentido tanto visualmente quanto na logica do app. A ideia foi deixar o codigo mais facil de entender, manter e evoluir com o tempo, separando melhor as responsabilidades entre partes como `services`, `store`, `hooks`, `screens` e `components`.
+
+Na parte de video, optei por usar o **react-native-webview** como solucao principal para conteudos do YouTube, pensando na UX ao manter o player incorporado na propria UI do app. Assim, o video pode ser exibido de forma embutida na tela, sem exigir que o usuario saia do fluxo para assistir. Alem disso, esse formato ajuda a evitar que o video precise ser baixado por completo para a memoria do app, ja que o consumo acontece de forma mais sob demanda, o que contribui para um uso mais eficiente de memoria. Ja o **expo-video** foi utilizado como player padrao para videos fora do YouTube, aproveitando melhor o suporte nativo para esse tipo de conteudo.
+
+O suporte a temas tambem foi uma decisao pensada desde a base da interface, com o objetivo de oferecer mais conforto visual ao usuario e permitir que cada pessoa utilize o app da forma que achar mais adequada no dia a dia.
+
+
+Os testes automatizados tambem contaram em boa parte com apoio de IA, sempre com meu acompanhamento, principalmente por eu ainda estar aprofundando meu aprendizado sobre testes em sistemas mobile. Ainda assim, eles foram pensados para validar partes importantes do app, como telas, componentes, store, services e funcoes auxiliares. Alem disso, a organizacao desses testes em uma pasta `__tests__`, sugerida pela IA e aceita por mim, ajudou a manter o projeto mais organizado e facilitou a leitura e o entendimento da estrutura.
+
 
 ## API utilizada
 
