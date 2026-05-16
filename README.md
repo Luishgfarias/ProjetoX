@@ -57,7 +57,7 @@ Esse arquivo pode ser instalado em um dispositivo Android compativel para testar
 Clone o repositorio e instale as dependencias:
 
 ```bash
-git clone <url-do-repositorio>
+git clone https://github.com/Luishgfarias/ProjetoX
 cd projetoX
 npm install
 ```
