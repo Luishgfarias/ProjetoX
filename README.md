@@ -203,9 +203,12 @@ Nesse caso, o app limpa o cache dos lancamentos, busca novamente a primeira pagi
 
 ## Decisoes tecnicas
 
-Boa parte das decisoes tecnicas deste app partiram de escolhas humanas minhas, com apoio de IA na execucao para agilizar o desenvolvimento. A organizacao geral do projeto tambem foi pensada por mim e, ao longo do processo, recebeu ajustes e refinamentos com ajuda da IA.
+Boa parte das decisoes tecnicas deste app partiram de escolhas humanas minhas, com apoio de IA na execucao para agilizar o processo de desenvolvimento. A organizacao geral do projeto tambem foi pensada por mim e, ao longo do processo, recebeu ajustes e refinamentos com ajuda da IA.
 
-Entre as principais decisoes de base do projeto, optei por usar **Zustand** como store para centralizar os dados de forma simples e direta, principalmente pela minha familiaridade com a biblioteca e pela forma enxuta como ela atende ao que o app precisa. Para as requisicoes a **API da SpaceX**, escolhi o **Axios**, tambem por familiaridade e por ele se encaixar bem no fluxo de consumo da API. Na parte de interface, o **NativeWind** foi uma escolha pessoal para facilitar a estilizacao com classes e manter o suporte aos temas claro e escuro.
+Entre as principais decisoes de base do projeto, optei por usar: 
+**Zustand** como store para centralizar os dados de forma simples e direta, principalmente pela minha familiaridade com a biblioteca e pela forma enxuta como ela atende ao que o app precisa.
+Para as requisicoes a **API da SpaceX**, escolhi o **Axios**, tambem por familiaridade e por ele se encaixar bem no fluxo de consumo da API.
+Na parte de interface, o **NativeWind** foi uma escolha pessoal para facilitar a estilizacao com classes e manter o suporte aos temas claro e escuro.
 
 Pensando no consumo de dados, decidi usar a API de forma paginada na listagem e buscar apenas os campos necessarios em cada consulta. Essa escolha ajuda a deixar as requisicoes mais leves, agiliza o processamento e contribui para um uso mais eficiente de memoria. Tambem optei por utilizar cache local, para reaproveitar dados ja carregados anteriormente e melhorar a experiencia de uso em novas consultas.
 
@@ -258,3 +261,9 @@ Os resultados sao exibidos dos lancamentos mais recentes para os mais antigos.
 | `npm run web` | Inicia o app na web |
 | `npm test` | Executa os testes |
 | `npm run test:watch` | Executa os testes em modo watch |
+
+<div align="center">
+  <h1>Projeto X</h1>
+  <img src="./assets/missaoEspecial.png" alt="Identidade visual do Projeto X" width="280" />
+  <h4><i>Explore cada lancamento como se fosse o primeiro passo rumo ao infinito.</i></h4>
+</div>
