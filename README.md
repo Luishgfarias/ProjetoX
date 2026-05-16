@@ -1,6 +1,26 @@
-# Projeto X
 
-Aplicativo mobile feito com Expo e React Native para explorar missoes espaciais da SpaceX. O app lista lancamentos, permite buscar missoes pelo nome, exibe detalhes completos de cada lancamento e oferece atalhos para artigos, transmissao, Wikipedia e outros links relacionados.
+<div align="center">
+  <h1>Projeto X</h1>
+  <img src="./assets/missaoEspecial.png" alt="Identidade visual do Projeto X" width="280" />
+  <h4><i>Explore cada lancamento como se fosse o primeiro passo rumo ao infinito.</i></h4>
+</div>
+
+<p>&nbsp;</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Expo-SDK%2054-0F172A?style=for-the-badge&logo=expo&logoColor=white" alt="Expo SDK 54" />
+  <img src="https://img.shields.io/badge/React%20Native-0.81-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React Native 0.81" />
+  <img src="https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5.9" />
+  <img src="https://img.shields.io/badge/React-19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React 19" />
+  <img src="https://img.shields.io/badge/NativeWind-4.2-0F172A?style=for-the-badge&logo=tailwindcss&logoColor=38BDF8" alt="NativeWind 4.2" />
+  <img src="https://img.shields.io/badge/Zustand-5.0-4B5563?style=for-the-badge" alt="Zustand 5.0" />
+  <img src="https://img.shields.io/badge/Axios-1.16-5A29E4?style=for-the-badge&logo=axios&logoColor=white" alt="Axios 1.16" />
+  <img src="https://img.shields.io/badge/Jest-29-C21325?style=for-the-badge&logo=jest&logoColor=white" alt="Jest 29" />
+</p>
+
+<p align="center">
+Aplicativo mobile feito para explorar missoes espaciais da SpaceX. O app lista lancamentos, permite buscar missoes pelo nome, exibe detalhes completos de cada lancamento e oferece atalhos para artigos, transmissao, Wikipedia e outros links relacionados.
+</p>
 
 ## Objetivo
 
@@ -205,10 +225,11 @@ Nesse caso, o app limpa o cache dos lancamentos, busca novamente a primeira pagi
 
 Boa parte das decisoes tecnicas deste app partiram de escolhas humanas minhas, com apoio de IA na execucao para agilizar o processo de desenvolvimento. A organizacao geral do projeto tambem foi pensada por mim e, ao longo do processo, recebeu ajustes e refinamentos com ajuda da IA.
 
-Entre as principais decisoes de base do projeto, optei por usar: 
-**Zustand** como store para centralizar os dados de forma simples e direta, principalmente pela minha familiaridade com a biblioteca e pela forma enxuta como ela atende ao que o app precisa.
-Para as requisicoes a **API da SpaceX**, escolhi o **Axios**, tambem por familiaridade e por ele se encaixar bem no fluxo de consumo da API.
-Na parte de interface, o **NativeWind** foi uma escolha pessoal para facilitar a estilizacao com classes e manter o suporte aos temas claro e escuro.
+Entre as principais decisoes de base do projeto, optei por usar:
+
+- **Zustand** como store para centralizar os dados de forma simples e direta, principalmente pela minha familiaridade com a biblioteca e pela forma enxuta como ela atende ao que o app precisa.
+- Para as requisicoes a **API da SpaceX**, escolhi o **Axios**, tambem por familiaridade e por ele se encaixar bem no fluxo de consumo da API.
+- Na parte de interface, o **NativeWind** foi uma escolha pessoal para facilitar a estilizacao com classes e manter o suporte aos temas claro e escuro.
 
 Pensando no consumo de dados, decidi usar a API de forma paginada na listagem e buscar apenas os campos necessarios em cada consulta. Essa escolha ajuda a deixar as requisicoes mais leves, agiliza o processamento e contribui para um uso mais eficiente de memoria. Tambem optei por utilizar cache local, para reaproveitar dados ja carregados anteriormente e melhorar a experiencia de uso em novas consultas.
 
@@ -217,7 +238,6 @@ Na estrutura do projeto, a organizacao e a separacao das pastas tambem foram def
 Na parte de video, optei por usar o **react-native-webview** como solucao principal para conteudos do YouTube, pensando na UX ao manter o player incorporado na propria UI do app. Assim, o video pode ser exibido de forma embutida na tela, sem exigir que o usuario saia do fluxo para assistir. Alem disso, esse formato ajuda a evitar que o video precise ser baixado por completo para a memoria do app, ja que o consumo acontece de forma mais sob demanda, o que contribui para um uso mais eficiente de memoria. Ja o **expo-video** foi utilizado como player padrao para videos fora do YouTube, aproveitando melhor o suporte nativo para esse tipo de conteudo.
 
 O suporte a temas tambem foi uma decisao pensada desde a base da interface, com o objetivo de oferecer mais conforto visual ao usuario e permitir que cada pessoa utilize o app da forma que achar mais adequada no dia a dia.
-
 
 Os testes automatizados tambem contaram em boa parte com apoio de IA, sempre com meu acompanhamento, principalmente por eu ainda estar aprofundando meu aprendizado sobre testes em sistemas mobile. Ainda assim, eles foram pensados para validar partes importantes do app, como telas, componentes, store, services e funcoes auxiliares. Alem disso, a organizacao desses testes em uma pasta `__tests__`, sugerida pela IA e aceita por mim, ajudou a manter o projeto mais organizado e facilitou a leitura e o entendimento da estrutura.
 
@@ -262,8 +282,8 @@ Os resultados sao exibidos dos lancamentos mais recentes para os mais antigos.
 | `npm test` | Executa os testes |
 | `npm run test:watch` | Executa os testes em modo watch |
 
-<div align="center">
-  <h1>Projeto X</h1>
-  <img src="./assets/missaoEspecial.png" alt="Identidade visual do Projeto X" width="280" />
-  <h4><i>Explore cada lancamento como se fosse o primeiro passo rumo ao infinito.</i></h4>
-</div>
+<p>&nbsp;</p>
+
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:0B1020,35:13203F,70:1D4ED8,100:60A5FA&height=120&section=footer" alt="Rodape decorativo do Projeto X" width="100%" />
+</p>
